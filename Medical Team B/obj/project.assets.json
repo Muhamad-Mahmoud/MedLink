@@ -33,6 +33,29 @@
             "related": ".pdb;.xml"
           }
         }
+      },
+      "MedLink,Application/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v9.0",
+        "dependencies": {
+          "MedLink.Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/MedLink,Application.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/MedLink,Application.dll": {}
+        }
+      },
+      "MedLink.Domain/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v9.0",
+        "compile": {
+          "bin/placeholder/MedLink.Domain.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/MedLink.Domain.dll": {}
+        }
       }
     }
   },
@@ -67,31 +90,42 @@
         "microsoft.openapi.1.6.17.nupkg.sha512",
         "microsoft.openapi.nuspec"
       ]
+    },
+    "MedLink,Application/1.0.0": {
+      "type": "project",
+      "path": "../MedLink,Application/MedLink,Application.csproj",
+      "msbuildProject": "../MedLink,Application/MedLink,Application.csproj"
+    },
+    "MedLink.Domain/1.0.0": {
+      "type": "project",
+      "path": "../MedLink.Domain/MedLink.Domain.csproj",
+      "msbuildProject": "../MedLink.Domain/MedLink.Domain.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net9.0": [
+      "MedLink,Application >= 1.0.0",
       "Microsoft.AspNetCore.OpenApi >= 9.0.3"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\PC\\.nuget\\packages\\": {},
+    "C:\\Users\\DESHA\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "F:\\Huma volve\\Medical Team B\\Medical Team B\\Medical Team B.csproj",
+      "projectUniqueName": "H:\\Huma-Volve\\Medical-Team-B\\Medical Team B\\Medical Team B.csproj",
       "projectName": "Medical Team B",
-      "projectPath": "F:\\Huma volve\\Medical Team B\\Medical Team B\\Medical Team B.csproj",
-      "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
-      "outputPath": "F:\\Huma volve\\Medical Team B\\Medical Team B\\obj\\",
+      "projectPath": "H:\\Huma-Volve\\Medical-Team-B\\Medical Team B\\Medical Team B.csproj",
+      "packagesPath": "C:\\Users\\DESHA\\.nuget\\packages\\",
+      "outputPath": "H:\\Huma-Volve\\Medical-Team-B\\Medical Team B\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\PC\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\DESHA\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -105,7 +139,11 @@
       "frameworks": {
         "net9.0": {
           "targetAlias": "net9.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "H:\\Huma-Volve\\Medical-Team-B\\MedLink,Application\\MedLink,Application.csproj": {
+              "projectPath": "H:\\Huma-Volve\\Medical-Team-B\\MedLink,Application\\MedLink,Application.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
@@ -118,7 +156,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.200"
+      "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
       "net9.0": {
@@ -148,7 +186,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.202/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.310/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
