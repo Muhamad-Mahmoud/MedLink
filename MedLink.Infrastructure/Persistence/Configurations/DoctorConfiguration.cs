@@ -19,7 +19,7 @@ public class DoctorConfiguration : IEntityTypeConfiguration<Doctor>
             .HasForeignKey(d => d.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Property(d => d.SpecializationId)
+        builder.Property(d => d.SpecialtyId)
             .IsRequired();
 
         builder.Property(d => d.Bio)
@@ -27,13 +27,16 @@ public class DoctorConfiguration : IEntityTypeConfiguration<Doctor>
 
         builder.Property(d => d.ImageUrl)
             .HasMaxLength(512);
+            
+        builder.Property(d => d.Price)
+            .HasPrecision(18, 2);
 
         builder.Property(d => d.ClinicDetails)
             .HasMaxLength(1000);
 
         builder.HasOne(d => d.Specialization)
             .WithMany(s => s.Doctors)
-            .HasForeignKey(d => d.SpecializationId)
+            .HasForeignKey(d => d.SpecialtyId)
             .OnDelete(DeleteBehavior.Restrict);
             
         builder.HasMany(d => d.Appointments)

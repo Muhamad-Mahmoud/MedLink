@@ -6,13 +6,15 @@ namespace MedLink.Domain.Entities.Medical;
 
 public class Doctor : BaseEntity
 {
+    public string Name { get; set; } = string.Empty;
     public string UserId { get; set; } = string.Empty;
 
-    public int SpecializationId { get; set; }
+    public int SpecialtyId { get; set; }
     public Specialization Specialization { get; set; } = null!;
 
     public string? Bio { get; set; }
     public string? ImageUrl { get; set; }
+    public decimal Price { get; set; }
     public string? ClinicDetails { get; set; }
 
     public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
