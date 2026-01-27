@@ -11,4 +11,12 @@
     <ProjectReference Include="..\MedLink.Domain\MedLink.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Interfaces\Services\" />
+    <Folder Include="DTOs\" />
+    <Folder Include="Mapping\" />
+    <Folder Include="Common\" />
+    <Folder Include="Services\" />
+  </ItemGroup>
+
 </Project>

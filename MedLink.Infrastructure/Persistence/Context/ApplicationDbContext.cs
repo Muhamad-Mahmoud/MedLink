@@ -8,7 +8,7 @@ using MedLink.Domain.Entities.User;
 using MedLink.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-namespace MedLink.Infrastructure.Persistence;
+namespace MedLink.Infrastructure.Persistence.Context;
 
 public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
