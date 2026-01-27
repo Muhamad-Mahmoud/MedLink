@@ -30,6 +30,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<FAQ> FAQs { get; set; }
     public DbSet<About> Abouts { get; set; }
+    
+    public DbSet<UserProfile> UserProfiles { get; set; }
+    public DbSet<Favorite> Favorites { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
