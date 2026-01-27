@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MedLink,Application\MedLink,Application.csproj" />
+    <ProjectReference Include="..\MedLink.Application\MedLink.Application.csproj" />
   </ItemGroup>
 
 </Project>

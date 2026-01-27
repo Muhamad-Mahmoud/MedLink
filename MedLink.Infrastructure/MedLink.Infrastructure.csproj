@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MedLink,Application\MedLink,Application.csproj" />
+    <ProjectReference Include="..\MedLink.Application\MedLink.Application.csproj" />
     <ProjectReference Include="..\MedLink.Domain\MedLink.Domain.csproj" />
   </ItemGroup>
 

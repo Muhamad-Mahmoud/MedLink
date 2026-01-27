@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Medical Team B", "Medical T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MedLink.Domain", "MedLink.Domain\MedLink.Domain.csproj", "{07F63EFE-F653-4300-9735-F853C027B5DF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MedLink,Application", "MedLink,Application\MedLink,Application.csproj", "{3492F6DB-355C-4E8E-8374-2F7362415D68}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MedLink.Application", "MedLink.Application\MedLink.Application.csproj", "{3492F6DB-355C-4E8E-8374-2F7362415D68}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MedLink.Infrastructure", "MedLink.Infrastructure\MedLink.Infrastructure.csproj", "{7E725A22-D24C-4BA7-8A8B-CAE0DF676BED}"
 EndProject
