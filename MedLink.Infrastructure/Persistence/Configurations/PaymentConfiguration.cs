@@ -1,0 +1,34 @@
+using MedLink.Domain.Entities.Payments;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace MedLink.Infrastructure.Persistence.Configurations;
+
+public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
+{
+    public void Configure(EntityTypeBuilder<Payment> builder)
+    {
+        builder.HasKey(p => p.Id);
+
+        builder.Property(p => p.AppointmentId)
+            .IsRequired();
+
+        builder.Property(p => p.OriginalAmount)
+            .HasPrecision(18, 2);
+
+        builder.Property(p => p.FinalAmount)
+            .HasPrecision(18, 2);
+
+        builder.Property(p => p.TransactionReference)
+            .IsRequired()
+            .HasMaxLength(100);
+
+        builder.Property(p => p.Status)
+            .IsRequired();
+
+        builder.HasOne(p => p.Appointment)
+            .WithMany()
+            .HasForeignKey(p => p.AppointmentId)
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+}
