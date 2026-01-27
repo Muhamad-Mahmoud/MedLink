@@ -1,9 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35919.96 d17.13
+VisualStudioVersion = 17.13.35919.96
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Medical Team B", "Medical Team B\Medical Team B.csproj", "{247719AD-BBF7-45BF-9D79-D38FAAC6DDDE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MedLink.Domain", "MedLink.Domain\MedLink.Domain.csproj", "{07F63EFE-F653-4300-9735-F853C027B5DF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MedLink.Application", "MedLink.Application\MedLink.Application.csproj", "{3492F6DB-355C-4E8E-8374-2F7362415D68}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MedLink.Infrastructure", "MedLink.Infrastructure\MedLink.Infrastructure.csproj", "{7E725A22-D24C-4BA7-8A8B-CAE0DF676BED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +21,18 @@ Global
 		{247719AD-BBF7-45BF-9D79-D38FAAC6DDDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{247719AD-BBF7-45BF-9D79-D38FAAC6DDDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{247719AD-BBF7-45BF-9D79-D38FAAC6DDDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07F63EFE-F653-4300-9735-F853C027B5DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07F63EFE-F653-4300-9735-F853C027B5DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07F63EFE-F653-4300-9735-F853C027B5DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07F63EFE-F653-4300-9735-F853C027B5DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3492F6DB-355C-4E8E-8374-2F7362415D68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3492F6DB-355C-4E8E-8374-2F7362415D68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3492F6DB-355C-4E8E-8374-2F7362415D68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3492F6DB-355C-4E8E-8374-2F7362415D68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E725A22-D24C-4BA7-8A8B-CAE0DF676BED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E725A22-D24C-4BA7-8A8B-CAE0DF676BED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E725A22-D24C-4BA7-8A8B-CAE0DF676BED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E725A22-D24C-4BA7-8A8B-CAE0DF676BED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
