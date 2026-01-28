@@ -1,5 +1,5 @@
 using MedLink.Domain.Entities.Chat;
-using MedLink.Infrastructure.Identity;
+using MedLink.Domain.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
