@@ -12,10 +12,6 @@ public class Payment : BaseEntity
     public string? StripePaymentIntentId { get; set; }
     public decimal Amount { get; set; } 
     public string Currency { get; set; } = "USD";
-    
-    public decimal OriginalAmount { get; set; }
-    public decimal FinalAmount { get; set; }
-    public string TransactionReference { get; set; } = string.Empty;
     public PaymentStatus Status { get; set; }
     public DateTime? PaidAt { get; set; }
 }

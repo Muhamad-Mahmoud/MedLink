@@ -31,11 +31,7 @@ public class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
         builder.Property(a => a.Fee)
             .HasPrecision(18, 2);
 
-        builder.Property(a => a.Notes)
-            .HasMaxLength(1000);
-
-        builder.Property(a => a.CancelledReason)
-            .HasMaxLength(500);
+      
             
         builder.Property(a => a.PatientName)
             .IsRequired()

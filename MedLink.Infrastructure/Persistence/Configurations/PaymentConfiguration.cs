@@ -13,11 +13,7 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         builder.Property(p => p.AppointmentId)
             .IsRequired();
 
-        builder.Property(p => p.OriginalAmount)
-            .HasPrecision(18, 2);
-
-        builder.Property(p => p.FinalAmount)
-            .HasPrecision(18, 2);
+        
 
         builder.Property(p => p.Amount)
             .HasPrecision(18, 2);
@@ -28,9 +24,7 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         builder.Property(p => p.StripePaymentIntentId)
             .HasMaxLength(255);
 
-        builder.Property(p => p.TransactionReference)
-            .IsRequired()
-            .HasMaxLength(100);
+   
 
         builder.Property(p => p.Status)
             .IsRequired();

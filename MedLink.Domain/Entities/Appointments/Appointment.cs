@@ -17,8 +17,8 @@ public class Appointment : BaseEntity
     public string PatientName { get; set; } = string.Empty;
     public string PatientPhone { get; set; } = string.Empty;
 
+
     public AppointmentStatus Status { get; set; }
     public decimal Fee { get; set; }
-    public string? Notes { get; set; }
-    public string? CancelledReason { get; set; }
+
 }
