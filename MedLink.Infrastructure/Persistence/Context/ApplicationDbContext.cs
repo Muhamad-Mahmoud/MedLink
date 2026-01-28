@@ -8,7 +8,7 @@ using MedLink.Domain.Entities.User;
 using MedLink.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-namespace MedLink.Infrastructure.Persistence;
+namespace MedLink.Infrastructure.Persistence.Context;
 
 public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
@@ -30,6 +30,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<FAQ> FAQs { get; set; }
     public DbSet<About> Abouts { get; set; }
+    
+    public DbSet<UserProfile> UserProfiles { get; set; }
+    public DbSet<Favorite> Favorites { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

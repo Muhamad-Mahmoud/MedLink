@@ -19,6 +19,15 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         builder.Property(p => p.FinalAmount)
             .HasPrecision(18, 2);
 
+        builder.Property(p => p.Amount)
+            .HasPrecision(18, 2);
+
+        builder.Property(p => p.Currency)
+            .HasMaxLength(10);
+
+        builder.Property(p => p.StripePaymentIntentId)
+            .HasMaxLength(255);
+
         builder.Property(p => p.TransactionReference)
             .IsRequired()
             .HasMaxLength(100);
