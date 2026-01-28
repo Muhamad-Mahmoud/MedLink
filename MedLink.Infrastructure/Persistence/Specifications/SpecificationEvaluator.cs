@@ -1,10 +1,6 @@
 ﻿using MedLink.Domain.Common;
 using MedLink_Application.Interfaces.Specifications;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace MedLink.Infrastructure.Persistence.Specifications
 {
@@ -28,9 +24,9 @@ namespace MedLink.Infrastructure.Persistence.Specifications
                 query = query.Skip(spec.Skip).Take(spec.Take);
 
 
-            query = spec.Includes.Aggregate(query, (current, include) => include(current));
+            query = spec.Includes.Aggregate(query, (current, include) => current.Include(include));
             return query;
 
         }
     }
-    }
+}

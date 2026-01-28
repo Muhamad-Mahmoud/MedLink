@@ -1,19 +1,14 @@
-﻿using MedLink.Domain.Common;
+﻿using System.Linq.Expressions;
+using MedLink.Domain.Common;
 using MedLink.Infrastructure.Persistence.Context;
 using MedLink.Infrastructure.Persistence.Specifications;
 using MedLink_Application.Interfaces.Persistence;
 using MedLink_Application.Interfaces.Specifications;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MedLink.Infrastructure.Persistence.Repositories
 {
-    public class  GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
+    public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
     {
 
         private readonly ApplicationDbContext _dbContext;
@@ -31,7 +26,7 @@ namespace MedLink.Infrastructure.Persistence.Repositories
 
 
 
-        public async Task<T> GetByIdAsync(Guid id)
+        public async Task<T> GetByIdAsync(int id)
         {
             return await _dbContext.Set<T>().FindAsync(id);
         }

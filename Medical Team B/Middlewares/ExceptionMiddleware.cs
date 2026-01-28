@@ -1,6 +1,6 @@
-﻿using Medical_Team_B.Errors;
-using System.Net;
+﻿using System.Net;
 using System.Text.Json;
+using Medical_Team_B.Errors;
 
 namespace Medical_Team_B.Middlewares
 {

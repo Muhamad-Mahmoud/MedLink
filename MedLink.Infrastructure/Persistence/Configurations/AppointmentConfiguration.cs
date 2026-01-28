@@ -36,7 +36,7 @@ public class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
 
         builder.Property(a => a.CancelledReason)
             .HasMaxLength(500);
-            
+
         builder.Property(a => a.PatientName)
             .IsRequired()
             .HasMaxLength(100);
