@@ -5,32 +5,29 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace MedLink.Infrastructure.Persistence.Configurations;
 
-public class DoctorReviewConfiguration : IEntityTypeConfiguration<Review>
+public class ReviewConfiguration : IEntityTypeConfiguration<Review>
 {
     public void Configure(EntityTypeBuilder<Review> builder)
     {
-        builder.HasKey(dr => dr.Id);
+        builder.HasKey(r => r.Id);
 
-        builder.Property(dr => dr.DoctorId)
+        builder.HasIndex(r => new { r.UserId, r.DoctorId })
+               .IsUnique();
+
+        builder.Property(r => r.Rating)
             .IsRequired();
 
-        builder.Property(dr => dr.UserId)
-            .IsRequired();
+        builder.Property(r => r.Comment)
+            .HasMaxLength(1000);
 
         builder.HasOne<ApplicationUser>()
             .WithMany()
-            .HasForeignKey(dr => dr.UserId)
+            .HasForeignKey(r => r.UserId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.Property(dr => dr.Rating)
-            .IsRequired();
-
-        builder.Property(dr => dr.Comment)
-            .HasMaxLength(1000);
-
-        builder.HasOne(dr => dr.Doctor)
+        builder.HasOne(r => r.Doctor)
             .WithMany(d => d.Reviews)
-            .HasForeignKey(dr => dr.DoctorId)
+            .HasForeignKey(r => r.DoctorId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

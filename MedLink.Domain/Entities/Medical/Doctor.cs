@@ -7,7 +7,6 @@ namespace MedLink.Domain.Entities.Medical;
 public class Doctor : BaseEntity
 {
     public string Name { get; set; } = string.Empty;
-    public string UserId { get; set; } = string.Empty;
 
     public int SpecialtyId { get; set; }
     public Specialization Specialization { get; set; } = null!;

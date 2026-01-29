@@ -19,7 +19,7 @@ namespace Medical_Team_B.Extensions
                 options.UseSqlServer(connectionString,
                     b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
 
-            
+
 
             services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
 

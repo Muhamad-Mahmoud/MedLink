@@ -11,13 +11,6 @@ public class DoctorConfiguration : IEntityTypeConfiguration<Doctor>
     {
         builder.HasKey(d => d.Id);
 
-        builder.Property(d => d.UserId)
-            .IsRequired();
-
-        builder.HasOne<ApplicationUser>()
-            .WithMany()
-            .HasForeignKey(d => d.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
 
         builder.Property(d => d.SpecialtyId)
             .IsRequired();
@@ -34,14 +27,10 @@ public class DoctorConfiguration : IEntityTypeConfiguration<Doctor>
         builder.Property(d => d.ClinicDetails)
             .HasMaxLength(1000);
 
-        builder.HasOne(d => d.Specialization)
-            .WithMany(s => s.Doctors)
-            .HasForeignKey(d => d.SpecialtyId)
-            .OnDelete(DeleteBehavior.Restrict);
-            
-        builder.HasMany(d => d.Appointments)
-            .WithOne(a => a.Doctor)
-            .HasForeignKey(a => a.DoctorId);
+        builder.HasMany(d => d.Availabilities)
+            .WithOne(av => av.Doctor)
+            .HasForeignKey(av => av.DoctorId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasMany(d => d.Availabilities)
             .WithOne(av => av.Doctor)

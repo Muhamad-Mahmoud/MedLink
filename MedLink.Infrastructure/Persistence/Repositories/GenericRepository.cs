@@ -31,7 +31,7 @@ namespace MedLink.Infrastructure.Persistence.Repositories
 
 
 
-        public async Task<T> GetByIdAsync(Guid id)
+        public async Task<T?> GetByIdAsync(int id)
         {
             return await _dbContext.Set<T>().FindAsync(id);
         }
@@ -42,7 +42,7 @@ namespace MedLink.Infrastructure.Persistence.Repositories
         }
 
 
-        public async Task<T> GetEntityWithAsync(ISpecification<T> spec)
+        public async Task<T?> GetEntityWithAsync(ISpecification<T> spec)
         {
             return await ApplySpecifications(spec).FirstOrDefaultAsync();
 
