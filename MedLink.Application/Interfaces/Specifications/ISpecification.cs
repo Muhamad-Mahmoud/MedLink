@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq.Expressions;
 
 namespace MedLink_Application.Interfaces.Specifications
 {
@@ -11,7 +6,7 @@ namespace MedLink_Application.Interfaces.Specifications
     {
 
         Expression<Func<T, bool>> Criteria { get; set; }
-        List<Func<IQueryable<T>, IQueryable<T>>> Includes { get; }
+        List<Expression<Func<T, object>>> Includes { get; }
         int Take { get; set; }
         int Skip { get; set; }
         bool IsPaginationEnabled { get; set; }

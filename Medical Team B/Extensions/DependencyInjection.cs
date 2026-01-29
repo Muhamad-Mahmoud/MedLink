@@ -1,8 +1,7 @@
-﻿using MedLink.Infrastructure.Identity;
-using MedLink.Infrastructure.Persistence.Context;
+﻿using MedLink.Infrastructure.Persistence.Context;
+using MedLink.Infrastructure.Persistence.Repositories;
 using MedLink.Infrastructure.Persistence.UnitOfWork;
 using MedLink_Application.Interfaces.Persistence;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Medical_Team_B.Extensions
@@ -19,8 +18,9 @@ namespace Medical_Team_B.Extensions
                 options.UseSqlServer(connectionString,
                     b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
 
-            
 
+
+            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
 
             return services;

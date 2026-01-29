@@ -1,6 +1,5 @@
 ﻿using Medical_Team_B.Errors;
 using MedLink.Infrastructure.Persistence.Context;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Medical_Team_B.Controllers
@@ -42,6 +41,6 @@ namespace Medical_Team_B.Controllers
         }
 
 
-    
-}
+
+    }
 }
