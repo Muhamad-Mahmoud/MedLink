@@ -5,7 +5,7 @@ using MedLink.Domain.Entities.Content;
 using MedLink.Domain.Entities.Medical;
 using MedLink.Domain.Entities.Payments;
 using MedLink.Domain.Entities.User;
-using MedLink.Infrastructure.Identity;
+using MedLink.Domain.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 namespace MedLink.Infrastructure.Persistence.Context;
