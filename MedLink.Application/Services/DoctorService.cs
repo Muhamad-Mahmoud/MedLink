@@ -26,5 +26,12 @@ namespace MedLink.Application.Services
 
             return _mapper.Map<IReadOnlyList<DoctorSearchResultDto>>(doctors);
         }
+
+        public async Task<IReadOnlyList<DoctorSearchResultDto>> GetTopRatedDoctorsAsync(int count)
+        {
+            var spec = new TopRatedDoctorsSpec(count);
+            var doctors = await _doctorRepo.GetAllWithSpecAsync(spec);
+            return _mapper.Map<IReadOnlyList<DoctorSearchResultDto>>(doctors);
+        }
     }
 }

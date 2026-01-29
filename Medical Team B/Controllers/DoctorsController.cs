@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Medical_Team_B.Controllers
 {
+    /// <summary>
+    /// Manages doctor-related operations.
+    /// </summary>
     public class DoctorsController : BaseApiController
     {
         private readonly IDoctorService _doctorService;
@@ -14,6 +17,10 @@ namespace Medical_Team_B.Controllers
             _doctorService = doctorService;
         }
 
+        /// <summary>
+        /// Searches for doctors based on criteria.
+        /// </summary>
+        /// <param name="searchParams">Filters for doctor search (e.g., keyword, specialty, location, date).</param>
         [HttpGet("search")]
         public async Task<ActionResult<IReadOnlyList<DoctorSearchResultDto>>> Search(
             [FromQuery] DoctorSearchParams searchParams)
@@ -21,5 +28,6 @@ namespace Medical_Team_B.Controllers
             var doctors = await _doctorService.SearchDoctorsAsync(searchParams);
             return Ok(doctors);
         }
+
     }
 }
