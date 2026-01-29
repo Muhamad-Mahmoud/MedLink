@@ -1,9 +1,4 @@
 ﻿using MedLink_Application.Interfaces.Specifications;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MedLink_Application.Interfaces.Persistence
 {

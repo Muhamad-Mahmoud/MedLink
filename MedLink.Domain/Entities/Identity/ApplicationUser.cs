@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
-namespace MedLink.Infrastructure.Identity;
+namespace MedLink.Domain.Identity;
 
 public class ApplicationUser : IdentityUser
 {

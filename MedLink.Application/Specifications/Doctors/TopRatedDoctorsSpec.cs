@@ -1,0 +1,19 @@
+using MedLink.Domain.Entities.Medical;
+using MedLink_Application.Specifications;
+
+namespace MedLink.Application.Specifications.Doctors
+{
+    public class TopRatedDoctorsSpec : BaseSpecification<Doctor>
+    {
+        public TopRatedDoctorsSpec(int count)
+        {
+            AddOrderByDesc(d => d.Reviews.Any() ? d.Reviews.Average(r => r.Rating) : 0);
+
+            AddIncludes(d => d.Specialization);
+            AddIncludes(d => d.Reviews);
+            AddIncludes(d => d.Availabilities);
+
+            ApplyPagination(0, count);
+        }
+    }
+}

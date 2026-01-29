@@ -1,23 +1,18 @@
-﻿using MedLink.Domain.Common;
+﻿using System.Linq.Expressions;
+using MedLink.Domain.Common;
 using MedLink_Application.Interfaces.Specifications;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MedLink_Application.Specifications
 {
     public class BaseSpecification<T> : ISpecification<T> where T : BaseEntity
     {
-        public Expression<Func<T, bool>> Criteria { get; set; }
-        public List<Func<IQueryable<T>, IQueryable<T>>> Includes { get; } = new();
+        public Expression<Func<T, bool>>? Criteria { get; set; }
+        public List<Expression<Func<T, object>>> Includes { get; } = new();
         public int Take { get; set; }
         public int Skip { get; set; }
         public bool IsPaginationEnabled { get; set; }
-        public Expression<Func<T, object>> OrderBy { get; set; }
-        public Expression<Func<T, object>> OrderByDescending { get; set; }
+        public Expression<Func<T, object>>? OrderBy { get; set; }
+        public Expression<Func<T, object>>? OrderByDescending { get; set; }
 
         public BaseSpecification() { }
 
@@ -27,9 +22,9 @@ namespace MedLink_Application.Specifications
         }
 
 
-        protected void AddIncludes(Func<IQueryable<T>, IQueryable<T>> thenIncludeExpression)
+        protected void AddIncludes(Expression<Func<T, object>> includeExpression)
         {
-            Includes.Add(thenIncludeExpression);
+            Includes.Add(includeExpression);
         }
 
         public void ApplyPagination(int skip, int take)
