@@ -71,6 +71,57 @@ namespace MedLink_Application.Services
         }
 
 
+
+        public async Task<AuthModel> GetTokenAsync(RequestTokenModel model)
+        {
+            var authModel = new AuthModel();
+
+            var user =  await _userManager.FindByEmailAsync(model.Email);
+
+            if (user is null || !await _userManager.CheckPasswordAsync(user, model.Password))
+            {
+                authModel.Message = "Email/Phone or Password is incorrect!";
+                return authModel;
+            }
+
+            var token = await CreateJwtToken(user);
+            authModel.Message = "Token created successfully";
+            authModel.IsAuthenticated = true;
+            authModel.Email = user.Email;
+            authModel.Username = user.UserName;
+            authModel.Roles = (await _userManager.GetRolesAsync(user)).ToList();
+            authModel.ExpiresOn = token.ValidTo;
+            authModel.Token = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return authModel;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         private async Task<JwtSecurityToken> CreateJwtToken(ApplicationUser user)
         {
             var userClaims = await _userManager.GetClaimsAsync(user);

@@ -10,5 +10,7 @@ namespace MedLink_Application.Interfaces.Services
     public interface IAuthService
     {
         Task<AuthModel> RegisterAsync(RegisterModel registerModel);
+        Task<AuthModel> GetTokenAsync(RequestTokenModel model);
+
     }
 }

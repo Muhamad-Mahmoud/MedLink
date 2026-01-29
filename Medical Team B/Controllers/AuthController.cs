@@ -29,5 +29,21 @@ namespace Medical_Team_B.Controllers
 
             return Ok(result);
         }
+
+
+        [HttpPost("login")]
+        public async Task<ActionResult<AuthModel>> GetTokenAsync([FromBody] RequestTokenModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _authService.GetTokenAsync(model);
+
+            if (!result.IsAuthenticated)
+                return BadRequest(result.Message);
+
+            return Ok(result);
+        }
+
     }
 }
