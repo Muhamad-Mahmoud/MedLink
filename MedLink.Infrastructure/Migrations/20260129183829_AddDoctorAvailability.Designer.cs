@@ -265,7 +265,7 @@ namespace MedLink.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SpecializationId");
+                    b.HasIndex("SpecialtyId");
 
                     b.ToTable("Doctors");
                 });
