@@ -13,18 +13,17 @@ namespace MedLink.Infrastructure.Persistence.Specifications
             if (spec.Criteria is not null)
                 query = query.Where(spec.Criteria);
 
+            query = spec.Includes.Aggregate(query, (current, include) => current.Include(include));
+
             if (spec.OrderBy is not null)
                 query = query.OrderBy(spec.OrderBy);
 
             if (spec.OrderByDescending is not null)
                 query = query.OrderByDescending(spec.OrderByDescending);
 
-
             if (spec.IsPaginationEnabled)
                 query = query.Skip(spec.Skip).Take(spec.Take);
 
-
-            query = spec.Includes.Aggregate(query, (current, include) => current.Include(include));
             return query;
 
         }

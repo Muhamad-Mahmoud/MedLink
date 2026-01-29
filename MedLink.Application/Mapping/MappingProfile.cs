@@ -1,5 +1,6 @@
 using AutoMapper;
 using MedLink.Application.DTOs.Doctors;
+using MedLink.Application.DTOs.Medical;
 using MedLink.Domain.Entities.Medical;
 
 namespace MedLink.Application.Mapping
@@ -12,6 +13,8 @@ namespace MedLink.Application.Mapping
                 .ForMember(dest => dest.Specialty, opt => opt.MapFrom(src => src.Specialization.Name))
                 .ForMember(dest => dest.Rating, opt => opt.MapFrom(src => src.Reviews.Any() ? src.Reviews.Average(r => r.Rating) : 0))
                 .ForMember(dest => dest.AvailableToday, opt => opt.MapFrom(src => src.Availabilities.Any(a => a.Date.Date == DateTime.Today && !a.IsBooked)));
+
+            CreateMap<Specialization, SpecializationDto>();
         }
     }
 }
