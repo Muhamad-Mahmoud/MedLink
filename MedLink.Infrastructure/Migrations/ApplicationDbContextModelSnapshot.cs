@@ -270,7 +270,7 @@ namespace MedLink.Infrastructure.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("SpecializationId")
+                    b.Property<int>("SpecialtyId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");

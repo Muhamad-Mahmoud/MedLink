@@ -3,6 +3,8 @@ using MedLink.Application.DTOs.Doctors;
 using MedLink.Application.Interfaces.Services;
 using MedLink.Application.Specifications.User;
 using MedLink.Domain.Entities.User;
+using MedLink.Domain.Entities.Medical;
+using MedLink.Domain.Exceptions;
 using MedLink_Application.Interfaces.Persistence;
 
 namespace MedLink.Application.Services
@@ -20,17 +22,21 @@ namespace MedLink.Application.Services
 
         public async Task AddFavoriteAsync(string userId, int doctorId)
         {
-            var repo = _unitOfWork.Repository<Favorite>();
+            var doctorRepo = _unitOfWork.Repository<Doctor>();
+            var doctor = await doctorRepo.GetByIdAsync(doctorId);
+            
+            if (doctor == null)
+                throw new NotFoundException($"Doctor with ID {doctorId} not found.");
 
+            var repo = _unitOfWork.Repository<Favorite>();
             var spec = new FavoritesWithDoctorsSpec(userId, doctorId);
             var existing = await repo.GetEntityWithAsync(spec);
 
-            if (existing == null)
-            {
-                var favorite = new Favorite { UserId = userId, DoctorId = doctorId };
-                await repo.AddAsync(favorite);
-                await _unitOfWork.Complete();
-            }
+            if (existing != null) return;
+
+            var favorite = new Favorite { UserId = userId, DoctorId = doctorId };
+            await repo.AddAsync(favorite);
+            await _unitOfWork.Complete();
         }
 
         public async Task RemoveFavoriteAsync(string userId, int doctorId)
