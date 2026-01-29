@@ -1,6 +1,8 @@
 using Medical_Team_B.Extensions;
+using MedLink.Domain.Identity;
 using MedLink.Infrastructure.Persistence.Context;
 using MedLink.Infrastructure.Persistence.Seed;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,13 +26,10 @@ var loggerFactory = services.GetRequiredService<ILoggerFactory>();
 try
 {
     var context = services.GetRequiredService<ApplicationDbContext>();
+    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
     await context.Database.MigrateAsync();
-    await ApplicationDbContextSeed.SeedAsync(context);
-
-    //var userManager = services.GetRequiredService<UserManager<AppUser>>();
-    //var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-    //await AppIdentityDbContextSeed.SeedUser(userManager);
-    //await AppIdentityDbContextSeed.SeedRoles(roleManager, userManager);
+    await ApplicationDbContextSeed.SeedAsync(context, userManager, roleManager);
 }
 catch (Exception ex)
 {
