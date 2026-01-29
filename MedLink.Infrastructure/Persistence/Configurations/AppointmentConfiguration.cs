@@ -11,14 +11,6 @@ public class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
     {
         builder.HasKey(a => a.Id);
 
-        builder.Property(a => a.BookedByUserId)
-            .IsRequired();
-
-        builder.HasOne<ApplicationUser>()
-            .WithMany()
-            .HasForeignKey(a => a.BookedByUserId)
-            .OnDelete(DeleteBehavior.Restrict);
-
         builder.Property(a => a.DoctorId)
             .IsRequired();
 
@@ -46,13 +38,9 @@ public class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
             .HasMaxLength(20);
 
         builder.HasOne(a => a.Doctor)
-            .WithMany(d => d.Appointments)
-            .HasForeignKey(a => a.DoctorId)
-            .OnDelete(DeleteBehavior.Restrict);
+               .WithMany(d => d.Appointments)
+               .HasForeignKey(a => a.DoctorId)
+               .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(a => a.Schedule)
-            .WithOne()
-            .HasForeignKey<Appointment>(a => a.ScheduleId)
-            .OnDelete(DeleteBehavior.Restrict);
     }
 }

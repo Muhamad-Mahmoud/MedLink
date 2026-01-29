@@ -11,22 +11,20 @@ public class UserProfileConfiguration : IEntityTypeConfiguration<UserProfile>
     {
         builder.HasKey(up => up.Id);
 
+        builder.HasIndex(x => x.UserId)
+               .IsUnique();
+
         builder.Property(up => up.UserId)
-            .IsRequired();
+               .IsRequired();
 
         builder.Property(up => up.FullName)
-            .IsRequired()
-            .HasMaxLength(150);
+               .IsRequired()
+               .HasMaxLength(150);
 
         builder.Property(up => up.ImageUrl)
-            .HasMaxLength(512);
+               .HasMaxLength(512);
 
         builder.Property(up => up.MedicalHistory)
-            .HasMaxLength(2000);
-
-        builder.HasOne<ApplicationUser>()
-            .WithOne()
-            .HasForeignKey<UserProfile>(up => up.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+               .HasMaxLength(2000);
     }
 }

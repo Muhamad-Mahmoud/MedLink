@@ -26,6 +26,10 @@ public class DoctorConfiguration : IEntityTypeConfiguration<Doctor>
         builder.Property(d => d.ClinicDetails)
             .HasMaxLength(1000);
 
+        builder.HasMany(d => d.Availabilities)
+            .WithOne(av => av.Doctor)
+            .HasForeignKey(av => av.DoctorId)
+            .OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(d => d.Specialization)
             .WithMany(s => s.Doctors)
             .HasForeignKey(d => d.SpecialtyId)
