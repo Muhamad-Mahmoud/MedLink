@@ -18,22 +18,34 @@ namespace MedLink.Infrastructure.Repositories
         {
             _context = context;
         }
-
         public async Task<DoctorAvailability?> GetByIdAsync(int id)
+                => await _context.DoctorAvailabilities.FindAsync(id);
+
+        public async Task<List<DoctorAvailability>> GetAvailableByDoctorAndDateAsync(int doctorId, DateTime date)
+            => await _context.DoctorAvailabilities
+                .Where(d => d.DoctorId == doctorId && d.Date.Date == date.Date && !d.IsBooked)
+                .ToListAsync();
+
+        public async Task MarkAsBookedAsync(int availabilityId)
         {
-            return await _context.DoctorAvailabilities.FindAsync(id);
+            var slot = await _context.DoctorAvailabilities.FindAsync(availabilityId);
+            if (slot != null)
+            {
+                slot.IsBooked = true;
+                _context.DoctorAvailabilities.Update(slot);
+                await _context.SaveChangesAsync();
+            }
         }
 
-        public async Task<List<DoctorAvailability>> GetAvailableByDoctorAndDateAsync(
-            int doctorId,
-            DateTime date)
+        public async Task MarkAsAvailableAsync(int availabilityId)
         {
-            return await _context.DoctorAvailabilities
-                .Where(x =>
-                    x.DoctorId == doctorId &&
-                    x.Date.Date == date.Date &&
-                    !x.IsBooked)
-                .ToListAsync();
+            var slot = await _context.DoctorAvailabilities.FindAsync(availabilityId);
+            if (slot != null)
+            {
+                slot.IsBooked = false;
+                _context.DoctorAvailabilities.Update(slot);
+                await _context.SaveChangesAsync();
+            }
         }
 
         public async Task UpdateAsync(DoctorAvailability availability)
