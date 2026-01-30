@@ -1,7 +1,9 @@
 ﻿using MedLink.Domain.Identity;
 using MedLink.Infrastructure.Persistence.Context;
 using MedLink.Infrastructure.Persistence.UnitOfWork;
+using MedLink_Application.Common.Email;
 using MedLink_Application.Common.JWT;
+using MedLink_Application.Common.Sms;
 using MedLink_Application.Interfaces.Persistence;
 using MedLink_Application.Interfaces.Services;
 using MedLink_Application.Services;
@@ -25,6 +27,18 @@ namespace Medical_Team_B.Extensions
 
 
 
+            var emailConfig = configuration.GetSection("EmailConfiguration")
+        .Get<EmailConfigurations>();
+
+            services.AddSingleton(emailConfig);
+
+            services.AddScoped(typeof(IEmailService), typeof(EmailService));
+
+            services.Configure<TwilioSettings>(configuration.GetSection("Twilio"));
+            services.AddTransient<ISmsService, SmsService>();
+
+
+
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -44,6 +58,11 @@ namespace Medical_Team_B.Extensions
                         ValidAudience = configuration["JWT:Audience"],
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Key"]))
                     };
+                })
+                .AddGoogle(googleOptions =>
+                {
+                    googleOptions.ClientId = configuration["Authentication:Google:ClientId"];
+                    googleOptions.ClientSecret = configuration["Authentication:Google:ClientSecret"];
                 });
 
            

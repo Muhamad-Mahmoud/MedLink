@@ -4,6 +4,7 @@ using MedLink_Application.Common.JWT;
 using MedLink_Application.DTOs.Identity;
 using MedLink_Application.Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -11,6 +12,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,13 +25,17 @@ namespace MedLink_Application.Services
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly Jwt _jwt;
         private readonly IMapper _mapper;
+        private readonly IEmailService _emailService;
+        private readonly ISmsService _smsService;
 
-        public AuthService(UserManager<ApplicationUser> userManager, IOptions<Jwt> jwt, IMapper mapper, RoleManager<IdentityRole> roleManager)
+        public AuthService(UserManager<ApplicationUser> userManager, IOptions<Jwt> jwt, IMapper mapper, RoleManager<IdentityRole> roleManager, IEmailService emailService, ISmsService smsService)
         {
             _userManager = userManager;
             _jwt = jwt.Value;
             _mapper = mapper;
             _roleManager = roleManager;
+            _emailService = emailService;
+            _smsService = smsService;
         }
 
 
@@ -121,7 +127,58 @@ namespace MedLink_Application.Services
 
 
 
+        public async Task<bool> ForgotPasswordAsync(ForgotPasswordModel model)
+        {
 
+
+            var user = await _userManager.FindByEmailAsync(model.Email!);
+
+            if (user is null)
+                return false;
+
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+
+            var param = new Dictionary<string, string?>
+            {
+                {"token",token},
+                {"email",model.Email }
+            };
+
+
+            var callback = QueryHelpers.AddQueryString(model.ClientUri, param);
+
+            var message = new EmailMessage([user.Email], "Reset Password Token", callback);
+            await _emailService.SendEmailAsync(message);
+
+            return true;
+
+        }
+
+
+
+
+        public async Task<ResetPasswordResult> ResetPasswordAsync(ResetPasswordModel model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email!);
+
+            if (user is null)
+                return new ResetPasswordResult(false, "user not found Request");
+
+
+            var result = await _userManager.ResetPasswordAsync(user, model.Token!, model.Password!);
+
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                return new ResetPasswordResult(false, errors);
+
+            }
+
+            return new ResetPasswordResult(true, "Password Changed Successfully");
+
+        }
 
 
 
@@ -183,5 +240,97 @@ namespace MedLink_Application.Services
         }
 
 
+        public async Task<string> SendPhoneVerificationAsync(string email, string phoneNumber)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return "User not found";
+
+            if (!phoneNumber.StartsWith("+"))
+                phoneNumber = "+" + phoneNumber;
+            
+            try
+            {
+                var status = await _smsService.SendVerificationTokenAsync(phoneNumber);
+                return $"Verification code sent to {phoneNumber}. Status: {status}";
+            }
+            catch (Exception ex)
+            {
+                return $"Failed to send verification code: {ex.Message}";
+            }
+        }
+
+        public async Task<string> ConfirmPhoneNumberAsync(string email, string code, string phoneNumber)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return "User not found";
+
+            if (!phoneNumber.StartsWith("+"))
+                phoneNumber = "+" + phoneNumber;
+
+            try
+            {
+                var isValid = await _smsService.VerifyTokenAsync(phoneNumber, code);
+                if (!isValid) return "Invalid code";
+
+                user.PhoneNumber = phoneNumber;
+                user.PhoneNumberConfirmed = true;
+                await _userManager.UpdateAsync(user);
+
+                return "Phone number confirmed successfully";
+            }
+            catch (Exception ex)
+            {
+                return $"Verification failed: {ex.Message}";
+            }
+        }
+
+        public async Task<AuthModel> LoginWithGoogleAsync(string email, string name, string googleId)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+            {
+                // Create user if not exists
+                user = new ApplicationUser
+                {
+                    UserName = email.Split('@')[0],
+                    Email = email,
+                    FullName = name,
+                    EmailConfirmed = true // Trusted source
+                };
+
+                var result = await _userManager.CreateAsync(user);
+                if (!result.Succeeded)
+                {
+                     var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                     return new AuthModel { Message = errors };
+                }
+
+                await _userManager.AddToRoleAsync(user, "User");
+                await _userManager.AddLoginAsync(user, new UserLoginInfo("Google", googleId, "Google"));
+            }
+            else
+            {
+                 // Ensure login is linked
+                 var logins = await _userManager.GetLoginsAsync(user);
+                 if (!logins.Any(l => l.LoginProvider == "Google" && l.ProviderKey == googleId))
+                 {
+                     await _userManager.AddLoginAsync(user, new UserLoginInfo("Google", googleId, "Google"));
+                 }
+            }
+
+            var token = await CreateJwtToken(user);
+
+            return new AuthModel
+            {
+                Message = "Login successful",
+                IsAuthenticated = true,
+                Token = new JwtSecurityTokenHandler().WriteToken(token),
+                Email = user.Email,
+                Username = user.UserName,
+                Roles = (await _userManager.GetRolesAsync(user)).ToList(),
+                ExpiresOn = token.ValidTo
+            };
+        }
     }
 }

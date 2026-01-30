@@ -12,6 +12,12 @@ namespace MedLink_Application.Interfaces.Services
         Task<AuthModel> RegisterAsync(RegisterModel registerModel);
         Task<AuthModel> GetTokenAsync(RequestTokenModel model);
         Task<string> AddRoleAsync(AddRoleModel model);
+        Task<bool> ForgotPasswordAsync(ForgotPasswordModel model);
+        Task<ResetPasswordResult> ResetPasswordAsync(ResetPasswordModel model);
+        Task<string> SendPhoneVerificationAsync(string email, string phoneNumber);
+        Task<string> ConfirmPhoneNumberAsync(string email, string code, string phoneNumber);
+        Task<AuthModel> LoginWithGoogleAsync(string email, string name, string googleId);
+
 
     }
 }
