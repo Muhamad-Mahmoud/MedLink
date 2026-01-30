@@ -41,17 +41,13 @@ namespace MedLink_Application.Services
 
         public async Task<AuthModel> RegisterAsync(RegisterModel model)
         {
-
             var isEmail = new EmailAddressAttribute().IsValid(model.Email);
-
             var existingUser = await _userManager.FindByEmailAsync(model.Email);
-
 
             if (existingUser is not null)
                 return new AuthModel { Message = "User already registered" };
 
             var user = _mapper.Map<ApplicationUser>(model);
-
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (!result.Succeeded)
@@ -62,33 +58,36 @@ namespace MedLink_Application.Services
 
             await _userManager.AddToRoleAsync(user, "User");
 
-            var token = await CreateJwtToken(user);
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+            var callbackUrl = $"{_jwt.Issuer}/api/auth/confirm-email?userId={user.Id}&code={code}";
+
+            var message = new EmailMessage([user.Email], "Confirm your email", callbackUrl);
+            await _emailService.SendEmailAsync(message);
 
             return new AuthModel
             {
-                Message = "Email was registered successfully",
+                Message = "User registered successfully. Please verify your email.",
+                IsAuthenticated = false,
                 Email = user.Email,
-                Username = model.Email.Split('@')[0],
-                IsAuthenticated = true,
-                ExpiresOn = token.ValidTo,
-                Roles = new List<string> { "User" },
-                Token = new JwtSecurityTokenHandler().WriteToken(token)
+                Username = model.Email.Split('@')[0]
             };
-
-
         }
-
-
 
         public async Task<AuthModel> GetTokenAsync(RequestTokenModel model)
         {
             var authModel = new AuthModel();
-
             var user =  await _userManager.FindByEmailAsync(model.Email);
 
             if (user is null || !await _userManager.CheckPasswordAsync(user, model.Password))
             {
-                authModel.Message = "Email/Phone or Password is incorrect!";
+                authModel.Message = "Email or Password is incorrect!";
+                return authModel;
+            }
+
+            if (!user.EmailConfirmed)
+            {
+                authModel.Message = "Email is not confirmed";
                 return authModel;
             }
 
@@ -331,6 +330,16 @@ namespace MedLink_Application.Services
                 Roles = (await _userManager.GetRolesAsync(user)).ToList(),
                 ExpiresOn = token.ValidTo
             };
+        }
+        public async Task<string> ConfirmEmailAsync(string userId, string code)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return "User not found";
+
+            code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+            var result = await _userManager.ConfirmEmailAsync(user, code);
+
+            return result.Succeeded ? "Email confirmed successfully" : "Error confirming email";
         }
     }
 }

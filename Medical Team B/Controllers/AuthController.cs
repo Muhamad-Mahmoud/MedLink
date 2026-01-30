@@ -118,6 +118,16 @@ namespace Medical_Team_B.Controllers
             return Ok(result);
         }
 
+        [HttpGet("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail(string userId, string code)
+        {
+            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(code))
+                return BadRequest("User ID and Code are required");
+
+            var result = await _authService.ConfirmEmailAsync(userId, code);
+            return Ok(result);
+        }
+
         [HttpGet("signin-google")]
         public IActionResult GoogleLogin()
         {

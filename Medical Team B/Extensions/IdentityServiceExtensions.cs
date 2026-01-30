@@ -21,7 +21,10 @@ namespace Medical_Team_B.Extensions
 
             services.Configure<Jwt>(configuration.GetSection("Jwt"));
 
-            services.AddIdentity<ApplicationUser, IdentityRole>()
+            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                options.SignIn.RequireConfirmedEmail = true;
+            })
          .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
