@@ -1,6 +1,6 @@
 using MedLink.Application.DTOs.Doctors;
 using MedLink.Application.Interfaces.Services;
-using MedLink_Application.DTOs.Doctors;
+using MedLink.Application.DTOs.Doctors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Medical_Team_B.Controllers

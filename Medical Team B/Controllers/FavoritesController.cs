@@ -35,10 +35,10 @@ namespace Medical_Team_B.Controllers
         /// </summary>
         /// <param name="favoriteDto">Contains the DoctorId to add.</param>
         [HttpPost]
-        public async Task<ActionResult> AddFavorite(FavoriteDto favoriteDto)
+        public async Task<ActionResult> AddFavorite([FromBody] FavoriteDto favoriteDto)
         {
             await _favoriteService.AddFavoriteAsync(UserId, favoriteDto.DoctorId);
-            return StatusCode(StatusCodes.Status201Created);
+            return StatusCode(StatusCodes.Status201Created, new { message = "Added to favorites successfully" });
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace Medical_Team_B.Controllers
         public async Task<ActionResult> RemoveFavorite(int doctorId)
         {
             await _favoriteService.RemoveFavoriteAsync(UserId, doctorId);
-            return NoContent();
+            return Ok(new { message = "Removed from favorites successfully" });
         }
     }
 }

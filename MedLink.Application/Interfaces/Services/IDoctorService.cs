@@ -1,5 +1,5 @@
 using MedLink.Application.DTOs.Doctors;
-using MedLink_Application.DTOs.Doctors;
+using MedLink.Application.DTOs.Doctors;
 
 namespace MedLink.Application.Interfaces.Services
 {

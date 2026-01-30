@@ -1,10 +1,10 @@
-﻿using MedLink.Domain.Identity;
+using MedLink.Domain.Identity;
 using MedLink.Infrastructure.Persistence.Context;
 using MedLink.Infrastructure.Persistence.UnitOfWork;
-using MedLink_Application.Common.JWT;
-using MedLink_Application.Interfaces.Persistence;
-using MedLink_Application.Interfaces.Services;
-using MedLink_Application.Services;
+using MedLink.Application.Common.JWT;
+using MedLink.Application.Interfaces.Persistence;
+using MedLink.Application.Interfaces.Services;
+using MedLink.Application.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;

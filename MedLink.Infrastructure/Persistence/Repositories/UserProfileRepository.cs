@@ -1,6 +1,6 @@
-﻿using MedLink.Domain.Entities.User;
+using MedLink.Domain.Entities.User;
 using MedLink.Infrastructure.Persistence.Context;
-using MedLink_Application.Interfaces.Persistence;
+using MedLink.Application.Interfaces.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

@@ -1,7 +1,7 @@
 using MedLink.Domain.Entities.Medical;
-using MedLink_Application.Specifications;
+using MedLink.Application.Specifications;
 
-namespace MedLink.Application.Specifications.Doctors
+namespace MedLink.Application.Specifications.Medical
 {
     public class TopRatedDoctorsSpec : BaseSpecification<Doctor>
     {
