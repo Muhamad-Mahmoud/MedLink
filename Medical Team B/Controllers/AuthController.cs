@@ -1,5 +1,6 @@
 using MedLink_Application.DTOs.Identity;
 using MedLink_Application.Interfaces.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -45,5 +46,20 @@ namespace Medical_Team_B.Controllers
             return Ok(result);
         }
 
+
+
+
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost("addrole")]
+        public async Task<ActionResult<string>> AddRoleAsync([FromBody] AddRoleModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _authService.AddRoleAsync(model);
+
+            return !string.IsNullOrEmpty(result) ? BadRequest(result) : Ok(model);
+        }
     }
 }

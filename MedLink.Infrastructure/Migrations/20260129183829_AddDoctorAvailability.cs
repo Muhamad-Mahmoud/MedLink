@@ -10,53 +10,6 @@ namespace MedLink.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Appointments_AspNetUsers_BookedByUserId",
-                table: "Appointments");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Doctors_AspNetUsers_UserId",
-                table: "Doctors");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Doctors_Specializations_SpecialtyId",
-                table: "Doctors");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_UserProfiles_AspNetUsers_UserId",
-                table: "UserProfiles");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Reviews_UserId",
-                table: "Reviews");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Doctors_SpecialtyId",
-                table: "Doctors");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Doctors_UserId",
-                table: "Doctors");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Appointments_BookedByUserId",
-                table: "Appointments");
-
-            migrationBuilder.DropColumn(
-                name: "UserId",
-                table: "Doctors");
-
-            migrationBuilder.DropColumn(
-                name: "BookedByUserId",
-                table: "Appointments");
-
-            migrationBuilder.AddColumn<int>(
-                name: "SpecializationId",
-                table: "Doctors",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
-
             migrationBuilder.AddColumn<string>(
                 name: "UserId",
                 table: "Appointments",
@@ -69,19 +22,6 @@ namespace MedLink.Infrastructure.Migrations
                 table: "Reviews",
                 columns: new[] { "UserId", "DoctorId" },
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Doctors_SpecializationId",
-                table: "Doctors",
-                column: "SpecializationId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Doctors_Specializations_SpecializationId",
-                table: "Doctors",
-                column: "SpecializationId",
-                principalTable: "Specializations",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />

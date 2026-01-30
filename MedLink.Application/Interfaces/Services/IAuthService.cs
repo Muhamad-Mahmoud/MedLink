@@ -11,6 +11,7 @@ namespace MedLink_Application.Interfaces.Services
     {
         Task<AuthModel> RegisterAsync(RegisterModel registerModel);
         Task<AuthModel> GetTokenAsync(RequestTokenModel model);
+        Task<string> AddRoleAsync(AddRoleModel model);
 
     }
 }
