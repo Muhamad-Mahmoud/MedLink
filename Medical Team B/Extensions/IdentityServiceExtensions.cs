@@ -1,10 +1,9 @@
+using MedLink.Application.Common.JWT;
 using MedLink.Domain.Identity;
 using MedLink.Infrastructure.Persistence.Context;
 using MedLink.Infrastructure.Persistence.UnitOfWork;
 using MedLink_Application.Common.Email;
-using MedLink_Application.Common.JWT;
 using MedLink_Application.Common.Sms;
-using MedLink_Application.Interfaces.Persistence;
 using MedLink_Application.Interfaces.Services;
 using MedLink_Application.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

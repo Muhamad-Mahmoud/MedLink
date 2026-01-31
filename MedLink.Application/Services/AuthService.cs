@@ -16,6 +16,8 @@ using System.Net.Mail;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using MedLink_Application.DTOs.Identity;
+using MedLink_Application.Interfaces.Services;
 
 namespace MedLink.Application.Services
 {
