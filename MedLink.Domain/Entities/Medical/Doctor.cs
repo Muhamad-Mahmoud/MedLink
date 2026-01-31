@@ -11,7 +11,7 @@ public class Doctor : BaseEntity
     public string Name { get; set; } = string.Empty;
 
     public int SpecialtyId { get; set; }
-    public Specialization Specialization { get; set; } = null!;
+    public Specialization? Specialization { get; set; } = null!;
 
     public string? Bio { get; set; }
     public string? ImageUrl { get; set; }

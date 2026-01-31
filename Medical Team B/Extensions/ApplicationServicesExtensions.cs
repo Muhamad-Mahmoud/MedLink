@@ -9,8 +9,14 @@ namespace Medical_Team_B.Extensions
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddScoped<IDoctorService, DoctorService>();
-            services.AddScoped<ISpecializationService, SpecializationService>();
+            services.AddScoped<ISpecializationService,SpecializationService>();
             services.AddScoped<IFavoriteService, FavoriteService>();
+            services.AddScoped<IDoctorService, DoctorService>();
+            services.AddScoped<IFAQ,FAQService>();
+            services.AddControllers()
+    .AddJsonOptions(options => {
+       options.JsonSerializerOptions.Converters.Add(new NetTopologySuite.IO.Converters.GeoJsonConverterFactory());
+    });
 
             services.AddAutoMapper(typeof(MappingProfile));
 

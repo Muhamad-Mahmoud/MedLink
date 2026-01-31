@@ -1,4 +1,5 @@
 using MedLink.Application.Interfaces.Specifications;
+using MedLink.Domain.Entities.Content;
 
 namespace MedLink.Application.Interfaces.Persistence
 {
@@ -12,6 +13,6 @@ namespace MedLink.Application.Interfaces.Persistence
         Task AddAsync(T entity);
         void Update(T entity);
         void Delete(T entity);
-
+       
     }
 }
