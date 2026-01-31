@@ -12,7 +12,6 @@ namespace MedLink_Application.DTOs.UserProfile
 
         public int TotalAppointments { get; set; }
         public int UpcomingAppointments { get; set; }
-        public int PrescriptionsCount { get; set; }
         public int FavoriteDoctorsCount { get; set; }
     }
 }
