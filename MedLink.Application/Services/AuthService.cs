@@ -1,8 +1,8 @@
-﻿using AutoMapper;
+using AutoMapper;
 using MedLink.Domain.Identity;
-using MedLink_Application.Common.JWT;
-using MedLink_Application.DTOs.Identity;
-using MedLink_Application.Interfaces.Services;
+using MedLink.Application.Common.JWT;
+using MedLink.Application.DTOs.Identity;
+using MedLink.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -15,7 +15,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MedLink_Application.Services
+namespace MedLink.Application.Services
 {
     public class AuthService : IAuthService
     {

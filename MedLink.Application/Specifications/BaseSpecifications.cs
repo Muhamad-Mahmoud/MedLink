@@ -1,8 +1,8 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 using MedLink.Domain.Common;
-using MedLink_Application.Interfaces.Specifications;
+using MedLink.Application.Interfaces.Specifications;
 
-namespace MedLink_Application.Specifications
+namespace MedLink.Application.Specifications
 {
     public class BaseSpecification<T> : ISpecification<T> where T : BaseEntity
     {

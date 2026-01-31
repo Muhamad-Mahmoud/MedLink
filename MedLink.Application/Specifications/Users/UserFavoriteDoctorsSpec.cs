@@ -1,11 +1,11 @@
 using MedLink.Domain.Entities.User;
-using MedLink_Application.Specifications;
+using MedLink.Application.Specifications;
 
-namespace MedLink.Application.Specifications.User
+namespace MedLink.Application.Specifications.Users
 {
-    public class FavoritesWithDoctorsSpec : BaseSpecification<Favorite>
+    public class UserFavoriteDoctorsSpec : BaseSpecification<Favorite>
     {
-        public FavoritesWithDoctorsSpec(string userId)
+        public UserFavoriteDoctorsSpec(string userId)
             : base(f => f.UserId == userId)
         {
             AddIncludes(f => f.Doctor);
@@ -13,7 +13,7 @@ namespace MedLink.Application.Specifications.User
             AddIncludes(f => f.Doctor.Reviews);
         }
 
-        public FavoritesWithDoctorsSpec(string userId, int doctorId)
+        public UserFavoriteDoctorsSpec(string userId, int doctorId)
             : base(f => f.UserId == userId && f.DoctorId == doctorId)
         {
         }

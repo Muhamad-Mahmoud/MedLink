@@ -257,15 +257,12 @@ namespace MedLink.Infrastructure.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("SpecializationId")
-                        .HasColumnType("int");
-
                     b.Property<int>("SpecialtyId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SpecializationId");
+                    b.HasIndex("SpecialtyId");
 
                     b.ToTable("Doctors");
                 });
@@ -717,7 +714,7 @@ namespace MedLink.Infrastructure.Migrations
                 {
                     b.HasOne("MedLink.Domain.Entities.Medical.Specialization", "Specialization")
                         .WithMany("Doctors")
-                        .HasForeignKey("SpecializationId")
+                        .HasForeignKey("SpecialtyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

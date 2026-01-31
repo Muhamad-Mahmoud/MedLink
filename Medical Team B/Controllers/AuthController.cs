@@ -1,5 +1,5 @@
-using MedLink_Application.DTOs.Identity;
-using MedLink_Application.Interfaces.Services;
+using MedLink.Application.DTOs.Identity;
+using MedLink.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
