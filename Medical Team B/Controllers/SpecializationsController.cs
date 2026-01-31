@@ -28,11 +28,10 @@ namespace Medical_Team_B.Controllers
         [HttpGet("with-doctors")]
         public async Task<ActionResult<IReadOnlyList<Specialization>>> GetAllWithDoctors()
         {
-            // 1. إنشاء الـ Spec
+            
             var spec = new BaseSpecification<Specialization>(s => true);
 
-            // 2. إضافة الـ Include بالطريقة اللي الـ BaseSpecification بتفهمها
-            // سطر واحد بسيط من غير كلمة .Include()
+           
             spec.Includes.Add(s => s.Doctors);
 
             var result = await _specializationService.GetAllSpecializationsAsync(spec);
@@ -64,7 +63,7 @@ namespace Medical_Team_B.Controllers
         [HttpPut("{id:int}")] 
         public async Task<IActionResult> Update(int id, [FromBody] Specialization specialization)
         {
-            if (id != specialization.Id) // Both are now ints
+            if (id != specialization.Id)
                 return BadRequest("ID mismatch");
 
             await _specializationService.UpdateSpecializationAsync(specialization);

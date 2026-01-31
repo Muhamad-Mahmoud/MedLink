@@ -37,7 +37,7 @@ namespace MedLink.Application.Services
             return specialization;
         }
 
-        // Read all
+       
         public async Task<IReadOnlyList<Specialization>> GetAllSpecializationsAsync(ISpecification<Specialization>? spec = null)
         {
             var repo = _unitOfWork.Repository<Specialization>();
@@ -46,14 +46,14 @@ namespace MedLink.Application.Services
                 : await repo.GetAllAsync();
         }
 
-        // Read by Id
-        public async Task<Specialization?> GetSpecializationByIdAsync(int id) // «” Œœ«„ «·‹ Guid
+       
+        public async Task<Specialization?> GetSpecializationByIdAsync(int id) 
         {
             var repo = _unitOfWork.Repository<Specialization>();
             return await repo.GetByIdAsync(id);
         }
 
-        // Update
+       
         public async Task UpdateSpecializationAsync(Specialization specialization)
         {
             var repo = _unitOfWork.Repository<Specialization>();
@@ -61,8 +61,8 @@ namespace MedLink.Application.Services
             await _unitOfWork.Complete();
         }
 
-        // Delete
-        public async Task DeleteSpecializationAsync(int id) // «” Œœ«„ «·‹ Guid
+        
+        public async Task DeleteSpecializationAsync(int id) 
         {
             var repo = _unitOfWork.Repository<Specialization>();
             var entity = await repo.GetByIdAsync(id);
