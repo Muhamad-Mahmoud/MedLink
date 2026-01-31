@@ -26,10 +26,7 @@ namespace Medical_Team_B.Controllers
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<DoctorSearchResultDto>>> GetFavorites()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId)) return Unauthorized();
-
-            var favorites = await _favoriteService.GetUserFavoritesAsync(userId);
+            var favorites = await _favoriteService.GetUserFavoritesAsync(UserId);
             return Ok(favorites);
         }
 
@@ -38,13 +35,10 @@ namespace Medical_Team_B.Controllers
         /// </summary>
         /// <param name="favoriteDto">Contains the DoctorId to add.</param>
         [HttpPost]
-        public async Task<ActionResult> AddFavorite(FavoriteDto favoriteDto)
+        public async Task<ActionResult> AddFavorite([FromBody] FavoriteDto favoriteDto)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId)) return Unauthorized();
-
-            await _favoriteService.AddFavoriteAsync(userId, favoriteDto.DoctorId);
-            return Ok();
+            await _favoriteService.AddFavoriteAsync(UserId, favoriteDto.DoctorId);
+            return StatusCode(StatusCodes.Status201Created, new { message = "Added to favorites successfully" });
         }
 
         /// <summary>
@@ -54,11 +48,8 @@ namespace Medical_Team_B.Controllers
         [HttpDelete("{doctorId}")]
         public async Task<ActionResult> RemoveFavorite(int doctorId)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId)) return Unauthorized();
-
-            await _favoriteService.RemoveFavoriteAsync(userId, doctorId);
-            return Ok();
+            await _favoriteService.RemoveFavoriteAsync(UserId, doctorId);
+            return Ok(new { message = "Removed from favorites successfully" });
         }
     }
 }

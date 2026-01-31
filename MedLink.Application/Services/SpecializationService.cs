@@ -3,7 +3,7 @@ using MedLink.Application.DTOs.Medical;
 using MedLink.Application.Interfaces.Services;
 using MedLink.Application.Specifications.Medical;
 using MedLink.Domain.Entities.Medical;
-using MedLink_Application.Interfaces.Persistence;
+using MedLink.Application.Interfaces.Persistence;
 
 namespace MedLink.Application.Services
 {
@@ -20,7 +20,7 @@ namespace MedLink.Application.Services
 
         public async Task<IReadOnlyList<SpecializationDto>> GetAllSpecializationsAsync(int? count = null)
         {
-            var spec = new GetAllSpecialtiesSpec(count);
+            var spec = new SpecialtyListSpec(count);
             var specializations = await _specializationRepo.GetAllWithSpecAsync(spec);
 
             return _mapper.Map<IReadOnlyList<SpecializationDto>>(specializations);

@@ -1,8 +1,8 @@
-﻿using System.Collections;
+using System.Collections;
 using MedLink.Domain.Common;
 using MedLink.Infrastructure.Persistence.Context;
 using MedLink.Infrastructure.Persistence.Repositories;
-using MedLink_Application.Interfaces.Persistence;
+using MedLink.Application.Interfaces.Persistence;
 
 namespace MedLink.Infrastructure.Persistence.UnitOfWork
 {

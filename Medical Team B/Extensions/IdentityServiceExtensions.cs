@@ -1,4 +1,4 @@
-﻿using MedLink.Domain.Identity;
+using MedLink.Domain.Identity;
 using MedLink.Infrastructure.Persistence.Context;
 using MedLink.Infrastructure.Persistence.UnitOfWork;
 using MedLink_Application.Common.Email;
