@@ -93,6 +93,12 @@ namespace MedLink.Application.Services
                 return authModel;
             }
 
+            if (user.IsDeleted)
+            {
+                authModel.Message = "Account is deleted";
+                return authModel;
+            }
+
             var token = await CreateJwtToken(user);
             authModel.Message = "Token created successfully";
             authModel.IsAuthenticated = true;
@@ -289,6 +295,9 @@ namespace MedLink.Application.Services
         {
             var user = await _userManager.FindByEmailAsync(email);
 
+            if (user != null && user.IsDeleted)
+                return new AuthModel { Message = "Account is deleted" };
+
             if (user == null)
             {
                 // Create user if not exists
@@ -342,6 +351,17 @@ namespace MedLink.Application.Services
             var result = await _userManager.ConfirmEmailAsync(user, code);
 
             return result.Succeeded ? "Email confirmed successfully" : "Error confirming email";
+        }
+
+        public async Task<string> DeleteAccountAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return "User not found";
+
+            user.IsDeleted = true;
+            var result = await _userManager.UpdateAsync(user);
+
+            return result.Succeeded ? "Account deleted successfully" : "Error deleting account";
         }
     }
 }

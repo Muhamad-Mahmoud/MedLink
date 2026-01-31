@@ -19,6 +19,7 @@ namespace MedLink_Application.Interfaces.Services
         Task<string> ConfirmPhoneNumberAsync(string email, string code, string phoneNumber);
         Task<AuthModel> LoginWithGoogleAsync(string email, string name, string googleId);
         Task<string> ConfirmEmailAsync(string userId, string code);
+        Task<string> DeleteAccountAsync(string userId);
 
 
     }

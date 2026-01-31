@@ -155,5 +155,16 @@ namespace Medical_Team_B.Controllers
             var authModel = await _authService.LoginWithGoogleAsync(email, name, googleId);
             return Ok(authModel);
         }
+
+        [Authorize]
+        [HttpDelete("account")]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "uid")?.Value;
+            if (userId == null) return Unauthorized();
+
+            var result = await _authService.DeleteAccountAsync(userId);
+            return Ok(result);
+        }
     }
 }
