@@ -30,10 +30,6 @@ namespace MedLink.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("BookedByUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("CancelledReason")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -64,9 +60,11 @@ namespace MedLink.Infrastructure.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("BookedByUserId");
+                    b.HasKey("Id");
 
                     b.HasIndex("DoctorId");
 
@@ -229,9 +227,16 @@ namespace MedLink.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Bio")
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ClinicDetails")
                         .HasMaxLength(1000)
@@ -240,9 +245,18 @@ namespace MedLink.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("Gender")
+                        .HasColumnType("int");
+
                     b.Property<string>("ImageUrl")
                         .HasMaxLength(512)
                         .HasColumnType("nvarchar(512)");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("float");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -252,18 +266,14 @@ namespace MedLink.Infrastructure.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("SpecialtyId")
+                    b.Property<int>("SpecializationId")
                         .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("SpecialtyId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("City", "SpecialtyId");
 
                     b.ToTable("Doctors");
                 });
@@ -390,7 +400,8 @@ namespace MedLink.Infrastructure.Migrations
 
                     b.HasIndex("DoctorId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "DoctorId")
+                        .IsUnique();
 
                     b.ToTable("Reviews");
                 });
@@ -641,12 +652,6 @@ namespace MedLink.Infrastructure.Migrations
 
             modelBuilder.Entity("MedLink.Domain.Entities.Appointments.Appointment", b =>
                 {
-                    b.HasOne("MedLink.Infrastructure.Identity.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("BookedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("MedLink.Domain.Entities.Medical.Doctor", "Doctor")
                         .WithMany("Appointments")
                         .HasForeignKey("DoctorId")
@@ -654,7 +659,7 @@ namespace MedLink.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("MedLink.Domain.Entities.Appointments.DoctorAvailability", "Schedule")
-                        .WithOne()
+                        .WithOne("Appointment")
                         .HasForeignKey("MedLink.Domain.Entities.Appointments.Appointment", "ScheduleId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -711,12 +716,6 @@ namespace MedLink.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("MedLink.Infrastructure.Identity.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Specialization");
                 });
 
@@ -763,15 +762,6 @@ namespace MedLink.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Doctor");
-                });
-
-            modelBuilder.Entity("MedLink.Domain.Entities.User.UserProfile", b =>
-                {
-                    b.HasOne("MedLink.Infrastructure.Identity.ApplicationUser", null)
-                        .WithOne()
-                        .HasForeignKey("MedLink.Domain.Entities.User.UserProfile", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -823,6 +813,11 @@ namespace MedLink.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("MedLink.Domain.Entities.Appointments.DoctorAvailability", b =>
+                {
+                    b.Navigation("Appointment");
                 });
 
             modelBuilder.Entity("MedLink.Domain.Entities.Chat.ChatRoom", b =>

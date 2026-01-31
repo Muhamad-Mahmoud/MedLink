@@ -22,9 +22,10 @@ public class DoctorAvailabilityConfiguration : IEntityTypeConfiguration<DoctorAv
         builder.Property(da => da.EndTime)
             .IsRequired();
 
-        builder.HasOne(da => da.Doctor)
-            .WithMany(d => d.Availabilities)
-            .HasForeignKey(da => da.DoctorId)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne(av => av.Appointment)
+        .WithOne(a => a.Schedule)
+        .HasForeignKey<Appointment>(a => a.ScheduleId)
+        .OnDelete(DeleteBehavior.Restrict);
+
     }
 }

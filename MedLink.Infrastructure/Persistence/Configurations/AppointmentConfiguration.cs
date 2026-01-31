@@ -1,5 +1,5 @@
 using MedLink.Domain.Entities.Appointments;
-using MedLink.Infrastructure.Identity;
+using MedLink.Domain.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,14 +10,6 @@ public class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
     public void Configure(EntityTypeBuilder<Appointment> builder)
     {
         builder.HasKey(a => a.Id);
-
-        builder.Property(a => a.BookedByUserId)
-            .IsRequired();
-
-        builder.HasOne<ApplicationUser>()
-            .WithMany()
-            .HasForeignKey(a => a.BookedByUserId)
-            .OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(a => a.DoctorId)
             .IsRequired();
@@ -42,13 +34,9 @@ public class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
             .HasMaxLength(20);
 
         builder.HasOne(a => a.Doctor)
-            .WithMany(d => d.Appointments)
-            .HasForeignKey(a => a.DoctorId)
-            .OnDelete(DeleteBehavior.Restrict);
+               .WithMany(d => d.Appointments)
+               .HasForeignKey(a => a.DoctorId)
+               .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(a => a.Schedule)
-            .WithOne()
-            .HasForeignKey<Appointment>(a => a.ScheduleId)
-            .OnDelete(DeleteBehavior.Restrict);
     }
 }

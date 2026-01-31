@@ -1,5 +1,3 @@
-using System;
-
 namespace MedLink.Domain.Common;
 
 public abstract class BaseEntity

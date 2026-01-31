@@ -5,7 +5,7 @@ using MedLink.Domain.Entities.Content;
 using MedLink.Domain.Entities.Medical;
 using MedLink.Domain.Entities.Payments;
 using MedLink.Domain.Entities.User;
-using MedLink.Infrastructure.Identity;
+using MedLink.Domain.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 namespace MedLink.Infrastructure.Persistence.Context;
@@ -18,7 +18,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<Doctor> Doctors { get; set; }
     public DbSet<Specialization> Specializations { get; set; }
-    
+
     public DbSet<Appointment> Appointments { get; set; }
     public DbSet<DoctorAvailability> DoctorAvailabilities { get; set; }
     public DbSet<Review> Reviews { get; set; }
@@ -30,14 +30,14 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<FAQ> FAQs { get; set; }
     public DbSet<About> Abouts { get; set; }
-    
+
     public DbSet<UserProfile> UserProfiles { get; set; }
     public DbSet<Favorite> Favorites { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        
+
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 }

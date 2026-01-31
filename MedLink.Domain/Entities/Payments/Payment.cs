@@ -10,7 +10,7 @@ public class Payment : BaseEntity
     public Appointment Appointment { get; set; } = null!;
 
     public string? StripePaymentIntentId { get; set; }
-    public decimal Amount { get; set; } 
+    public decimal Amount { get; set; }
     public string Currency { get; set; } = "USD";
     public PaymentStatus Status { get; set; }
     public DateTime? PaidAt { get; set; }

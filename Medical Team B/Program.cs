@@ -1,5 +1,6 @@
 using Medical_Team_B.Extensions;
 using MedLink.Infrastructure.Persistence.Context;
+using MedLink.Infrastructure.Persistence.Seed;
 using MedLink.Infrastructure.Repositories;
 using MedLink_Application.Interfaces.Repositories;
 using MedLink_Application.Mappers;
@@ -21,6 +22,8 @@ builder.Services.AddControllers();
 //        Assembly.GetAssembly(typeof(GetAppointmentByIdQuery))));
 
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddApplicationServices();
+builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 builder.Services.AddScoped<IDoctorAvailabilityRepository, DoctorAvailabilityRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
@@ -43,7 +46,6 @@ builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 //});
 builder.Services.AddOpenApi();
 
-
 var app = builder.Build();
 
 
@@ -56,8 +58,7 @@ try
 {
     var context = services.GetRequiredService<ApplicationDbContext>();
     await context.Database.MigrateAsync();
-
-  
+    await ApplicationDbContextSeed.SeedAsync(context);
 
     //var userManager = services.GetRequiredService<UserManager<AppUser>>();
     //var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();

@@ -6,10 +6,10 @@ namespace MedLink.Domain.Entities.Appointments;
 
 public class Appointment : BaseEntity
 {
+
+    public string UserId { get; set; } = string.Empty;
     public int DoctorId { get; set; }
     public Doctor Doctor { get; set; } = null!;
-
-    public string BookedByUserId { get; set; } = string.Empty;
 
     public int ScheduleId { get; set; }
     public DoctorAvailability Schedule { get; set; } = null!;
