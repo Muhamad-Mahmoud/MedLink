@@ -3,7 +3,7 @@ using MedLink.Application.DTOs.Doctors;
 using MedLink.Application.Interfaces.Services;
 using MedLink.Application.Specifications.Medical;
 using MedLink.Domain.Entities.Medical;
-using MedLink.Application.DTOs.Doctors;
+using MedLink.Domain.Exceptions;
 using MedLink.Application.Interfaces.Persistence;
 using MedLink.Application.Interfaces.Specifications;
 
@@ -69,8 +69,7 @@ namespace MedLink.Application.Services
             }
             else
             {
-                
-                throw new KeyNotFoundException($"Doctor with ID {id} not found.");
+                throw new NotFoundException($"Doctor with ID {id} not found.");
             }
         }
 
@@ -90,11 +89,6 @@ namespace MedLink.Application.Services
                 : await repo.GetAllAsync();
         }
 
-        // Read by Id
-       
-        
-          
-        
     }
     }
 
