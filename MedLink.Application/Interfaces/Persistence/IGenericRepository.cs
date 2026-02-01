@@ -1,7 +1,6 @@
-﻿using MedLink_Application.Interfaces.Specifications;
-using System.Linq.Expressions;
+using MedLink_Application.Interfaces.Specifications;
 
-namespace MedLink_Application.Interfaces.Persistence
+namespace MedLink.Application.Interfaces.Persistence
 {
     public interface IGenericRepository<T>
     {

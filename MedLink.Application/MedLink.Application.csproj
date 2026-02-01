@@ -20,6 +20,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.3.9" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="NETCore.MailKit" Version="2.1.0" />
     <ProjectReference Include="..\MedLink.Domain\MedLink.Domain.csproj" />
   </ItemGroup>
 

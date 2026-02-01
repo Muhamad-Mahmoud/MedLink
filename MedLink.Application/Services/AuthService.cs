@@ -1,23 +1,22 @@
 using AutoMapper;
 using MedLink.Domain.Identity;
-using MedLink.Application.Common.JWT;
-using MedLink.Application.DTOs.Identity;
-using MedLink.Application.Interfaces.Services;
+using MedLink_Application.Common.JWT;
+using MedLink_Application.DTOs.Identity;
+using MedLink_Application.Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Net.Mail;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 using MedLink_Application.DTOs.Identity;
 using MedLink_Application.Interfaces.Services;
+using MedLink_Application.Common.JWT;
+using NETCore.MailKit.Core;
+using MedLink.Domain.Identity;
 
 namespace MedLink.Application.Services
 {
@@ -64,7 +63,7 @@ namespace MedLink.Application.Services
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
             var callbackUrl = $"{_jwt.Issuer}/api/auth/confirm-email?userId={user.Id}&code={code}";
 
-            var message = new EmailMessage([user.Email], "Confirm your email", callbackUrl);
+            var message = new EmailMessage([user.Email], "Confirm Your Email", callbackUrl);
             await _emailService.SendEmailAsync(message);
 
             return new AuthModel
@@ -143,6 +142,7 @@ namespace MedLink.Application.Services
             if (user is null)
                 return false;
 
+        }
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
@@ -156,7 +156,7 @@ namespace MedLink.Application.Services
 
             var callback = QueryHelpers.AddQueryString(model.ClientUri, param);
 
-            var message = new EmailMessage([user.Email], "Reset Password Token", callback);
+            var message = new EmailMessage([user.Email], "Reset Your Password", callback);
             await _emailService.SendEmailAsync(message);
 
             return true;
@@ -362,6 +362,44 @@ namespace MedLink.Application.Services
             var result = await _userManager.UpdateAsync(user);
 
             return result.Succeeded ? "Account deleted successfully" : "Error deleting account";
+        }
+
+        public async Task<AuthModel> RestoreAccountAsync(RequestTokenModel model)
+        {
+            var authModel = new AuthModel();
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if (user is null || !await _userManager.CheckPasswordAsync(user, model.Password))
+            {
+                authModel.Message = "Email or Password is incorrect!";
+                return authModel;
+            }
+
+            if (!user.IsDeleted)
+            {
+                authModel.Message = "Account is not deleted";
+                return authModel;
+            }
+
+            user.IsDeleted = false;
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                authModel.Message = "Error restoring account";
+                return authModel;
+            }
+
+            var token = await CreateJwtToken(user);
+            authModel.Message = "Account restored and logged in successfully";
+            authModel.IsAuthenticated = true;
+            authModel.Email = user.Email;
+            authModel.Username = user.UserName;
+            authModel.Roles = (await _userManager.GetRolesAsync(user)).ToList();
+            authModel.ExpiresOn = token.ValidTo;
+            authModel.Token = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return authModel;
         }
     }
 }

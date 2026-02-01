@@ -1,15 +1,51 @@
 using MedLink.Domain.Entities.Appointments;
 using MedLink.Domain.Entities.Medical;
 using MedLink.Domain.Enums;
+using MedLink.Domain.Identity;
 using MedLink.Infrastructure.Persistence.Context;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using NetTopologySuite.Geometries;
 
 namespace MedLink.Infrastructure.Persistence.Seed
 {
     public static class ApplicationDbContextSeed
     {
-        public static async Task SeedAsync(ApplicationDbContext context)
+        // SRID 4326 = WGS84 (standard GPS coordinate system)
+        private const int Srid = 4326;
+
+        public static async Task SeedAsync(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
+            // Seed Roles
+            var adminRoleId = "d11126cb-d069-4e04-a165-d4cf495d513d";
+            if (!await roleManager.RoleExistsAsync("Admin"))
+            {
+                var role = new IdentityRole("Admin")
+                {
+                    Id = adminRoleId
+                };
+                await roleManager.CreateAsync(role);
+            }
+
+            // Seed Admin User
+            var adminEmail = "admin@medlink.com";
+            if (await userManager.FindByEmailAsync(adminEmail) == null)
+            {
+                var adminUser = new ApplicationUser
+                {
+                    UserName = adminEmail,
+                    Email = adminEmail,
+                    FullName = "System Admin",
+                    EmailConfirmed = true
+                };
+
+                var result = await userManager.CreateAsync(adminUser, "Admin@123");
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(adminUser, "Admin");
+                }
+            }
+
             // Seed Specializations
             if (!await context.Specializations.AnyAsync())
             {
@@ -43,8 +79,7 @@ namespace MedLink.Infrastructure.Persistence.Seed
                         City = "Cairo",
                         Bio = "Expert Cardiologist with over 15 years of experience in treating complex heart conditions.",
                         Price = 500,
-                        Latitude = 30.0444,
-                        Longitude = 31.2357, // Downtown Cairo
+                        Location = CreatePoint(31.2357, 30.0444), // Downtown Cairo (Lng, Lat)
                         Gender = Gender.Male,
                         ImageUrl = "https://randomuser.me/api/portraits/men/32.jpg",
                         Address = "123 Tahrir St, Downtown, Cairo",
@@ -61,8 +96,7 @@ namespace MedLink.Infrastructure.Persistence.Seed
                         City = "Giza",
                         Bio = "Certified Dermatologist specializing in cosmetic procedures and skin health.",
                         Price = 300,
-                        Latitude = 30.0131,
-                        Longitude = 31.2089, // Dokki, Giza area
+                        Location = CreatePoint(31.2089, 30.0131), // Dokki, Giza area
                         Gender = Gender.Female,
                         ImageUrl = "https://randomuser.me/api/portraits/women/44.jpg",
                         Address = "45 Dokki St, Giza",
@@ -78,8 +112,7 @@ namespace MedLink.Infrastructure.Persistence.Seed
                         City = "Alexandria",
                         Bio = "Friendly Pediatrician dedicated to the health and well-being of children.",
                         Price = 250,
-                        Latitude = 31.2001,
-                        Longitude = 29.9187, // Alexandria
+                        Location = CreatePoint(29.9187, 31.2001), // Alexandria
                         Gender = Gender.Male,
                         ImageUrl = "https://randomuser.me/api/portraits/men/85.jpg",
                         Address = "10 Corniche Rd, Alexandria",
@@ -95,10 +128,9 @@ namespace MedLink.Infrastructure.Persistence.Seed
                         City = "Cairo",
                         Bio = "Cardiology consultant focusing on preventive care.",
                         Price = 450,
-                        Latitude = 30.0875,
-                        Longitude = 31.3283, // Heliopolis, Cairo
+                        Location = CreatePoint(31.3283, 30.0875), // Heliopolis, Cairo
                         Gender = Gender.Female,
-                         ImageUrl = "https://randomuser.me/api/portraits/women/65.jpg",
+                        ImageUrl = "https://randomuser.me/api/portraits/women/65.jpg",
                         Address = "99 Merghany St, Heliopolis, Cairo",
                         Availabilities = new List<DoctorAvailability>
                         {
@@ -111,5 +143,11 @@ namespace MedLink.Infrastructure.Persistence.Seed
                 await context.SaveChangesAsync();
             }
         }
+
+        private static Point CreatePoint(double longitude, double latitude)
+        {
+            return new Point(longitude, latitude) { SRID = Srid };
+        }
     }
 }
+

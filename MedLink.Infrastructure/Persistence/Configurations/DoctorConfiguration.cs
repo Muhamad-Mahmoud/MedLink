@@ -20,6 +20,18 @@ public class DoctorConfiguration : IEntityTypeConfiguration<Doctor>
             .HasForeignKey(d => d.SpecialtyId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.Property(d => d.Location)
+            .HasColumnType("geography")
+            .IsRequired();
+
+        builder.Property(d => d.Address);
+
+        builder.Property(d => d.City)
+            .IsRequired();
+
+        builder.Property(d => d.Gender)
+            .IsRequired();
+
         builder.HasMany(d => d.Availabilities)
             .WithOne(av => av.Doctor)
             .HasForeignKey(av => av.DoctorId)

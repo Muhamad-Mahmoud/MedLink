@@ -1,6 +1,6 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 
-namespace MedLink_Application.Interfaces.Specifications
+namespace MedLink.Application.Interfaces.Specifications
 {
     public interface ISpecification<T>
     {

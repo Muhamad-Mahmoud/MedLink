@@ -1,6 +1,6 @@
-﻿using MedLink.Domain.Common;
+using MedLink.Domain.Common;
 
-namespace MedLink_Application.Interfaces.Persistence
+namespace MedLink.Application.Interfaces.Persistence
 {
     public interface IUnitOfWork : IDisposable
     {

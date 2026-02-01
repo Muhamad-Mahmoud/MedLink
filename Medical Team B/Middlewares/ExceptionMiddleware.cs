@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Text.Json;
 using Medical_Team_B.Errors;
+using MedLink.Domain.Exceptions;
 
 namespace Medical_Team_B.Middlewares
 {
@@ -27,15 +28,35 @@ namespace Medical_Team_B.Middlewares
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                //Log Exception in Database
-
+                
                 context.Response.ContentType = "application/json";
-                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                
+                int statusCode = (int)HttpStatusCode.InternalServerError;
+                var result = string.Empty;
 
-                var response = _env.IsDevelopment() ?
-                    new ApiExceptionResponse((int)HttpStatusCode.InternalServerError, ex.Message, ex.StackTrace.ToString())
-                    : new ApiExceptionResponse((int)HttpStatusCode.InternalServerError);
+                switch (ex)
+                {
+                    case NotFoundException notFoundException:
+                        statusCode = (int)HttpStatusCode.NotFound;
+                        break;
+                    case BadRequestException badRequestException:
+                        statusCode = (int)HttpStatusCode.BadRequest;
+                        break;
+                    default:
+                        statusCode = (int)HttpStatusCode.InternalServerError;
+                        break;
+                }
 
+                context.Response.StatusCode = statusCode;
+
+                var response = _env.IsDevelopment() 
+                    ? new ApiExceptionResponse(statusCode, ex.Message, ex.StackTrace?.ToString())
+                    : new ApiExceptionResponse(statusCode, ex.Message); // For NotFound, we usually want the message even in Prod
+
+                if (statusCode == (int)HttpStatusCode.InternalServerError && !_env.IsDevelopment())
+                {
+                    response = new ApiExceptionResponse(statusCode); // Generic message for real server errors in Prod
+                }
 
                 var options = new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 

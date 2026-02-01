@@ -1,11 +1,11 @@
-﻿using MedLink.Domain.Entities.Medical;
-using MedLink_Application.Specifications;
+using MedLink.Domain.Entities.Medical;
+using MedLink.Application.Specifications;
 
 namespace MedLink.Application.Specifications.Medical
 {
-    public class GetAllSpecialtiesSpec : BaseSpecification<Specialization>
+    public class SpecialtyListSpec : BaseSpecification<Specialization>
     {
-        public GetAllSpecialtiesSpec(int? count = null)
+        public SpecialtyListSpec(int? count = null)
         {
             AddOrderBy(s => s.Name);
 

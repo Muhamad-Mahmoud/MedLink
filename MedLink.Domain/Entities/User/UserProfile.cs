@@ -1,4 +1,4 @@
-﻿using MedLink.Domain.Common;
+using MedLink.Domain.Common;
 using MedLink.Domain.Enums;
 
 namespace MedLink.Domain.Entities.User

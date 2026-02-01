@@ -737,7 +737,7 @@ namespace MedLink.Infrastructure.Migrations
                     b.HasOne("MedLink.Domain.Entities.Medical.Specialization", "Specialization")
                         .WithMany("Doctors")
                         .HasForeignKey("SpecialtyId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Specialization");
