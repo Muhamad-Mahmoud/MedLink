@@ -13,11 +13,11 @@ namespace MedLink_Application.Interfaces.Services
 
         Task<PagedResult<AppointmentListItemDto>> GetUpcomingAsync(string userId, int page, int pageSize);
 
-        Task CancelAsync(
-            string userId,
-            int appointmentId,
-            string? reason
-        );
+        //Task CancelAsync(
+        //    string userId,
+        //    int appointmentId,
+        //    string? reason
+        //);
     }
 
 

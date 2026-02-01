@@ -52,7 +52,7 @@ namespace MedLink.API.Controllers
         }
 
 
-        // GET: api/profile/me
+        // api/profile/me
         [HttpGet("me")]
         public async Task<ActionResult<EditProfileDto>> GetMyProfile()
         {
@@ -65,7 +65,7 @@ namespace MedLink.API.Controllers
             return Ok(profile);
         }
 
-        // PUT: api/profile
+        //  api/profile
         [HttpPut]
         public async Task<IActionResult> UpdateMyProfile([FromBody] UpdateProfileDto dto)
         {
@@ -96,7 +96,7 @@ namespace MedLink.API.Controllers
         }
 
 
-        // DELETE: api/profile/image
+        // api/profile/image
         [HttpDelete("image")]
         public async Task<IActionResult> RemoveProfileImage()
         {
@@ -108,9 +108,8 @@ namespace MedLink.API.Controllers
             return NoContent();
         }
 
-        // ================= Appointments =================
 
-        // GET: api/profile/appointments/past
+        //  api/profile/appointments/past
 
         [HttpGet("appointments/past")]
         public async Task<IActionResult> GetPast(
@@ -125,7 +124,7 @@ namespace MedLink.API.Controllers
             return Ok(result);
         }
 
-        // GET: api/profile/appointments/past
+        //api/profile/appointments/past
 
         [HttpGet("appointments/upcoming")]
         public async Task<IActionResult> GetUpcoming(
@@ -140,24 +139,8 @@ namespace MedLink.API.Controllers
             return Ok(result);
         }
 
-        //[HttpPost("appointments/{appointmentId}/cancel")]
-        //public async Task<IActionResult> Cancel(
-        //int appointmentId,
-        // [FromBody] CancelAppointmentRequest request)
-        // {
-        //            var userId = GetUserId();
 
-        //            await _appointmentService
-        //                .CancelAsync(userId, appointmentId, request?.Reason);
-
-        //            return NoContent();
-        // }
-        
-
-
-        // ================= Language =================
-
-        // GET: api/profile/language
+        // api/profile/language
         [HttpGet("language")]
         public async Task<IActionResult> GetPreferredLanguage()
         {
@@ -169,7 +152,7 @@ namespace MedLink.API.Controllers
             return Ok(language);
         }
 
-        // PUT: api/profile/language
+        //  api/profile/language
         [HttpPut("language")]
         public async Task<IActionResult> UpdatePreferredLanguage([FromBody] UpdateLanguageDto dto)
         {
