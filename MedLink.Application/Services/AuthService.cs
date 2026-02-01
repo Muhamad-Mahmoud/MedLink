@@ -363,5 +363,43 @@ namespace MedLink.Application.Services
 
             return result.Succeeded ? "Account deleted successfully" : "Error deleting account";
         }
+
+        public async Task<AuthModel> RestoreAccountAsync(RequestTokenModel model)
+        {
+            var authModel = new AuthModel();
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if (user is null || !await _userManager.CheckPasswordAsync(user, model.Password))
+            {
+                authModel.Message = "Email or Password is incorrect!";
+                return authModel;
+            }
+
+            if (!user.IsDeleted)
+            {
+                authModel.Message = "Account is not deleted";
+                return authModel;
+            }
+
+            user.IsDeleted = false;
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                authModel.Message = "Error restoring account";
+                return authModel;
+            }
+
+            var token = await CreateJwtToken(user);
+            authModel.Message = "Account restored and logged in successfully";
+            authModel.IsAuthenticated = true;
+            authModel.Email = user.Email;
+            authModel.Username = user.UserName;
+            authModel.Roles = (await _userManager.GetRolesAsync(user)).ToList();
+            authModel.ExpiresOn = token.ValidTo;
+            authModel.Token = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return authModel;
+        }
     }
 }
