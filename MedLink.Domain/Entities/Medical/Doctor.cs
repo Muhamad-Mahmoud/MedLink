@@ -20,6 +20,7 @@ public class Doctor : BaseEntity
 
     public string City { get; set; } = string.Empty;
     public Gender Gender { get; set; }
+    public bool IsDeleted { get; set; }= false;
     
     /// Geographic location of doctor's clinic (SRID 4326 = WGS84)
     public Point Location { get; set; } = null!;
