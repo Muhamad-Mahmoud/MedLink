@@ -12,13 +12,16 @@ namespace Medical_Team_B.Controllers
 
     public class AuthController : BaseApiController
     {
-
         private readonly IAuthService _authService;
 
         public AuthController(IAuthService authService)
         {
             _authService = authService;
         }
+
+        // ===================================
+        // 1. Authentication & Registration
+        // ===================================
 
         [HttpPost("register")]
         public async Task<ActionResult<AuthModel>> RegisterAsync([FromBody] RegisterModel registerDto)
@@ -34,7 +37,6 @@ namespace Medical_Team_B.Controllers
             return Ok(result);
         }
 
-
         [HttpPost("login")]
         public async Task<ActionResult<AuthModel>> GetTokenAsync([FromBody] RequestTokenModel model)
         {
@@ -46,86 +48,6 @@ namespace Medical_Team_B.Controllers
             if (!result.IsAuthenticated)
                 return BadRequest(result.Message);
 
-            return Ok(result);
-        }
-
-
-
-
-
-        [Authorize(Roles = "Admin")]
-        [HttpPost("addrole")]
-        public async Task<ActionResult<string>> AddRoleAsync([FromBody] AddRoleModel model)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var result = await _authService.AddRoleAsync(model);
-
-            return !string.IsNullOrEmpty(result) ? BadRequest(result) : Ok(model);
-        }
-
-
-
-
-
-        [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordModel model)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest();
-
-            var isVerificationEmailSent = await _authService.ForgotPasswordAsync(model);
-
-            if (!isVerificationEmailSent)
-                return BadRequest("Invalid Request");
-            return Ok();
-
-
-
-        }
-
-
-
-
-        [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordModel model)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest();
-
-            var result = await _authService.ResetPasswordAsync(model);
-
-            if (!result.Success)
-                return BadRequest(new { Errors = result.Message });
-            return Ok(result.Message);
-        }
-
-        [HttpPost("verify-phone/send")]
-        public async Task<IActionResult> SendPhoneVerification([FromBody] SendPhoneVerificationModel model)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            var result = await _authService.SendPhoneVerificationAsync(model.Email, model.PhoneNumber);
-            return Ok(result);
-        }
-
-        [HttpPost("verify-phone/confirm")]
-        public async Task<IActionResult> ConfirmPhone([FromBody] ConfirmPhoneModel model)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            var result = await _authService.ConfirmPhoneNumberAsync(model.Email, model.Code, model.PhoneNumber);
-            return Ok(result);
-        }
-
-        [HttpGet("confirm-email")]
-        public async Task<IActionResult> ConfirmEmail(string userId, string code)
-        {
-            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(code))
-                return BadRequest("User ID and Code are required");
-
-            var result = await _authService.ConfirmEmailAsync(userId, code);
             return Ok(result);
         }
 
@@ -156,6 +78,25 @@ namespace Medical_Team_B.Controllers
             return Ok(authModel);
         }
 
+        // ===================================
+        // 2. Account Management
+        // ===================================
+
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _authService.ChangePasswordAsync(model);
+
+            if (!result.Equals("Password changed successfully", StringComparison.OrdinalIgnoreCase))
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
         [Authorize]
         [HttpDelete("account")]
         public async Task<IActionResult> DeleteAccount()
@@ -179,6 +120,84 @@ namespace Medical_Team_B.Controllers
                 return BadRequest(result.Message);
 
             return Ok(result);
+        }
+
+        // ===================================
+        // 3. Password Recovery
+        // ===================================
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            var isVerificationEmailSent = await _authService.ForgotPasswordAsync(model);
+
+            if (!isVerificationEmailSent)
+                return BadRequest("Invalid Request");
+            return Ok();
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            var result = await _authService.ResetPasswordAsync(model);
+
+            if (!result.Success)
+                return BadRequest(new { Errors = result.Message });
+            return Ok(result.Message);
+        }
+
+        // ===================================
+        // 4. Verification (Email & Phone)
+        // ===================================
+
+        [HttpGet("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail(string userId, string code)
+        {
+            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(code))
+                return BadRequest("User ID and Code are required");
+
+            var result = await _authService.ConfirmEmailAsync(userId, code);
+            return Ok(result);
+        }
+
+        [HttpPost("verify-phone/send")]
+        public async Task<IActionResult> SendPhoneVerification([FromBody] SendPhoneVerificationModel model)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var result = await _authService.SendPhoneVerificationAsync(model.Email, model.PhoneNumber);
+            return Ok(result);
+        }
+
+        [HttpPost("verify-phone/confirm")]
+        public async Task<IActionResult> ConfirmPhone([FromBody] ConfirmPhoneModel model)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var result = await _authService.ConfirmPhoneNumberAsync(model.Email, model.Code, model.PhoneNumber);
+            return Ok(result);
+        }
+
+        // ===================================
+        // 5. Administration
+        // ===================================
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost("addrole")]
+        public async Task<ActionResult<string>> AddRoleAsync([FromBody] AddRoleModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _authService.AddRoleAsync(model);
+
+            return !string.IsNullOrEmpty(result) ? BadRequest(result) : Ok(model);
         }
     }
 }

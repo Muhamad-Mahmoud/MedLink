@@ -21,6 +21,7 @@ namespace MedLink_Application.Interfaces.Services
         Task<string> ConfirmEmailAsync(string userId, string code);
         Task<string> DeleteAccountAsync(string userId);
         Task<AuthModel> RestoreAccountAsync(RequestTokenModel model);
+        Task<string> ChangePasswordAsync(ChangePasswordModel model);
 
 
     }

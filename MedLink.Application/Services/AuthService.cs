@@ -40,6 +40,9 @@ namespace MedLink.Application.Services
             _smsService = smsService;
         }
 
+        // =================================================================================================
+        // 1. Authentication & Registration
+        // =================================================================================================
 
         public async Task<AuthModel> RegisterAsync(RegisterModel model)
         {
@@ -47,7 +50,7 @@ namespace MedLink.Application.Services
             var existingUser = await _userManager.FindByEmailAsync(model.Email);
 
             if (existingUser is not null)
-                return new AuthModel { Message = "User already registered" };
+                return new AuthModel { Message = "Email already registered" };
 
             var user = _mapper.Map<ApplicationUser>(model);
             var result = await _userManager.CreateAsync(user, model.Password);
@@ -111,186 +114,6 @@ namespace MedLink.Application.Services
             return authModel;
         }
 
-
-
-
-        public async Task<string> AddRoleAsync(AddRoleModel model)
-        {
-            var user = await _userManager.FindByIdAsync(model.UserId);
-
-            if (user is null || !await _roleManager.RoleExistsAsync(model.Role))
-                return "Invalid User ID or Role";
-
-            if (await _userManager.IsInRoleAsync(user, model.Role))
-                return "User already assigned to this role";
-
-            var result = await _userManager.AddToRoleAsync(user, model.Role);
-
-            return result.Succeeded ? string.Empty : "Something went wrong";
-
-        }
-
-
-
-
-
-        public async Task<bool> ForgotPasswordAsync(ForgotPasswordModel model)
-        {
-
-
-            var user = await _userManager.FindByEmailAsync(model.Email!);
-
-            if (user is null)
-                return false;
-
-
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-
-
-            var param = new Dictionary<string, string?>
-            {
-                {"token",token},
-                {"email",model.Email }
-            };
-
-
-            var callback = QueryHelpers.AddQueryString(model.ClientUri, param);
-
-            var message = new EmailMessage([user.Email], "Reset Your Password", callback);
-            await _emailService.SendEmailAsync(message);
-
-            return true;
-
-        }
-
-
-
-
-        public async Task<ResetPasswordResult> ResetPasswordAsync(ResetPasswordModel model)
-        {
-            var user = await _userManager.FindByEmailAsync(model.Email!);
-
-            if (user is null)
-                return new ResetPasswordResult(false, "user not found Request");
-
-
-            var result = await _userManager.ResetPasswordAsync(user, model.Token!, model.Password!);
-
-            if (!result.Succeeded)
-            {
-                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                return new ResetPasswordResult(false, errors);
-
-            }
-
-            return new ResetPasswordResult(true, "Password Changed Successfully");
-
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        private async Task<JwtSecurityToken> CreateJwtToken(ApplicationUser user)
-        {
-            var userClaims = await _userManager.GetClaimsAsync(user);
-            var roles = await _userManager.GetRolesAsync(user);
-            var roleClaims = new List<Claim>();
-
-            foreach (var role in roles)
-            {
-                roleClaims.Add(new Claim("roles", role));
-            }
-
-            var claims = new List<Claim>
-            {
-                new Claim(JwtRegisteredClaimNames.Sub,user.UserName),
-                new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
-                new Claim("uid",user.Id)
-            };
-
-            if (!string.IsNullOrWhiteSpace(user.Email))
-                claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email));
-
-            if (!string.IsNullOrWhiteSpace(user.PhoneNumber))
-                claims.Add(new Claim("phone_number", user.PhoneNumber));
-
-            claims.AddRange(userClaims);
-            claims.AddRange(roleClaims);
-
-
-            var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
-            var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
-
-            var jwtSecurityToken = new JwtSecurityToken(
-                issuer: _jwt.Issuer,
-                audience: _jwt.Audience,
-                claims: claims,
-                expires: DateTime.Now.AddDays(Convert.ToDouble(_jwt.DurationInDays)),
-                signingCredentials: signingCredentials
-            );
-
-            return jwtSecurityToken;
-        }
-
-
-        public async Task<string> SendPhoneVerificationAsync(string email, string phoneNumber)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null) return "User not found";
-
-            if (!phoneNumber.StartsWith("+"))
-                phoneNumber = "+" + phoneNumber;
-            
-            try
-            {
-                var status = await _smsService.SendVerificationTokenAsync(phoneNumber);
-                return $"Verification code sent to {phoneNumber}. Status: {status}";
-            }
-            catch (Exception ex)
-            {
-                return $"Failed to send verification code: {ex.Message}";
-            }
-        }
-
-        public async Task<string> ConfirmPhoneNumberAsync(string email, string code, string phoneNumber)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null) return "User not found";
-
-            if (!phoneNumber.StartsWith("+"))
-                phoneNumber = "+" + phoneNumber;
-
-            try
-            {
-                var isValid = await _smsService.VerifyTokenAsync(phoneNumber, code);
-                if (!isValid) return "Invalid code";
-
-                user.PhoneNumber = phoneNumber;
-                user.PhoneNumberConfirmed = true;
-                await _userManager.UpdateAsync(user);
-
-                return "Phone number confirmed successfully";
-            }
-            catch (Exception ex)
-            {
-                return $"Verification failed: {ex.Message}";
-            }
-        }
-
         public async Task<AuthModel> LoginWithGoogleAsync(string email, string name, string googleId)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -300,10 +123,17 @@ namespace MedLink.Application.Services
 
             if (user == null)
             {
+                var baseUserName = email.Split('@')[0];
+                var userName = baseUserName;
+                while (await _userManager.FindByNameAsync(userName) != null)
+                {
+                    userName = $"{baseUserName}{Random.Shared.Next(1000, 9999)}";
+                }
+
                 // Create user if not exists
                 user = new ApplicationUser
                 {
-                    UserName = email.Split('@')[0],
+                    UserName = userName,
                     Email = email,
                     FullName = name,
                     EmailConfirmed = true // Trusted source
@@ -342,15 +172,26 @@ namespace MedLink.Application.Services
                 ExpiresOn = token.ValidTo
             };
         }
-        public async Task<string> ConfirmEmailAsync(string userId, string code)
+
+        // =================================================================================================
+        // 2. Account Management
+        // =================================================================================================
+
+        public async Task<string> ChangePasswordAsync(ChangePasswordModel model)
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null) return "User not found";
 
-            code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
-            var result = await _userManager.ConfirmEmailAsync(user, code);
+            if (user.IsDeleted) return "Account is deleted";
 
-            return result.Succeeded ? "Email confirmed successfully" : "Error confirming email";
+            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+
+            if (!result.Succeeded)
+            {
+                return string.Join(", ", result.Errors.Select(e => e.Description));
+            }
+
+            return "Password changed successfully";
         }
 
         public async Task<string> DeleteAccountAsync(string userId)
@@ -400,6 +241,176 @@ namespace MedLink.Application.Services
             authModel.Token = new JwtSecurityTokenHandler().WriteToken(token);
 
             return authModel;
+        }
+
+        // =================================================================================================
+        // 3. Password Recovery
+        // =================================================================================================
+
+        public async Task<bool> ForgotPasswordAsync(ForgotPasswordModel model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email!);
+
+            if (user is null)
+                return false;
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            var param = new Dictionary<string, string?>
+            {
+                {"token",token},
+                {"email",model.Email }
+            };
+
+            var callback = QueryHelpers.AddQueryString(model.ClientUri, param);
+
+            var message = new EmailMessage([user.Email], "Reset Your Password", callback);
+            await _emailService.SendEmailAsync(message);
+
+            return true;
+        }
+
+        public async Task<ResetPasswordResult> ResetPasswordAsync(ResetPasswordModel model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email!);
+
+            if (user is null)
+                return new ResetPasswordResult(false, "user not found Request");
+
+            var result = await _userManager.ResetPasswordAsync(user, model.Token!, model.Password!);
+
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                return new ResetPasswordResult(false, errors);
+
+            }
+
+            return new ResetPasswordResult(true, "Password Changed Successfully");
+        }
+
+        // =================================================================================================
+        // 4. Verification (Email & Phone)
+        // =================================================================================================
+
+        public async Task<string> ConfirmEmailAsync(string userId, string code)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return "User not found";
+
+            code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+            var result = await _userManager.ConfirmEmailAsync(user, code);
+
+            return result.Succeeded ? "Email confirmed successfully" : "Error confirming email";
+        }
+
+        public async Task<string> SendPhoneVerificationAsync(string email, string phoneNumber)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return "User not found";
+
+            if (!phoneNumber.StartsWith("+"))
+                phoneNumber = "+" + phoneNumber;
+            
+            try
+            {
+                var status = await _smsService.SendVerificationTokenAsync(phoneNumber);
+                return $"Verification code sent to {phoneNumber}. Status: {status}";
+            }
+            catch (Exception ex)
+            {
+                return $"Failed to send verification code: {ex.Message}";
+            }
+        }
+
+        public async Task<string> ConfirmPhoneNumberAsync(string email, string code, string phoneNumber)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return "User not found";
+
+            if (!phoneNumber.StartsWith("+"))
+                phoneNumber = "+" + phoneNumber;
+
+            try
+            {
+                var isValid = await _smsService.VerifyTokenAsync(phoneNumber, code);
+                if (!isValid) return "Invalid code";
+
+                user.PhoneNumber = phoneNumber;
+                user.PhoneNumberConfirmed = true;
+                await _userManager.UpdateAsync(user);
+
+                return "Phone number confirmed successfully";
+            }
+            catch (Exception ex)
+            {
+                return $"Verification failed: {ex.Message}";
+            }
+        }
+
+        // =================================================================================================
+        // 5. Administration
+        // =================================================================================================
+
+        public async Task<string> AddRoleAsync(AddRoleModel model)
+        {
+            var user = await _userManager.FindByIdAsync(model.UserId);
+
+            if (user is null || !await _roleManager.RoleExistsAsync(model.Role))
+                return "Invalid User ID or Role";
+
+            if (await _userManager.IsInRoleAsync(user, model.Role))
+                return "User already assigned to this role";
+
+            var result = await _userManager.AddToRoleAsync(user, model.Role);
+
+            return result.Succeeded ? string.Empty : "Something went wrong";
+        }
+
+        // =================================================================================================
+        // 6. Private Helpers
+        // =================================================================================================
+
+        private async Task<JwtSecurityToken> CreateJwtToken(ApplicationUser user)
+        {
+            var userClaims = await _userManager.GetClaimsAsync(user);
+            var roles = await _userManager.GetRolesAsync(user);
+            var roleClaims = new List<Claim>();
+
+            foreach (var role in roles)
+            {
+                roleClaims.Add(new Claim("roles", role));
+            }
+
+            var claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Sub,user.UserName),
+                new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
+                new Claim("uid",user.Id)
+            };
+
+            if (!string.IsNullOrWhiteSpace(user.Email))
+                claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email));
+
+            if (!string.IsNullOrWhiteSpace(user.PhoneNumber))
+                claims.Add(new Claim("phone_number", user.PhoneNumber));
+
+            claims.AddRange(userClaims);
+            claims.AddRange(roleClaims);
+
+
+            var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
+            var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
+
+            var jwtSecurityToken = new JwtSecurityToken(
+                issuer: _jwt.Issuer,
+                audience: _jwt.Audience,
+                claims: claims,
+                expires: DateTime.Now.AddDays(Convert.ToDouble(_jwt.DurationInDays)),
+                signingCredentials: signingCredentials
+            );
+
+            return jwtSecurityToken;
         }
     }
 }
