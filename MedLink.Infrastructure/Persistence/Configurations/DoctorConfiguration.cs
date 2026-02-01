@@ -26,6 +26,18 @@ public class DoctorConfiguration : IEntityTypeConfiguration<Doctor>
         builder.Property(d => d.ClinicDetails)
             .HasMaxLength(1000);
 
+        builder.Property(d => d.Location)
+            .HasColumnType("geography")
+            .IsRequired();
+
+        builder.Property(d => d.Address);
+
+        builder.Property(d => d.City)
+            .IsRequired();
+
+        builder.Property(d => d.Gender)
+            .IsRequired();
+
         builder.HasMany(d => d.Availabilities)
             .WithOne(av => av.Doctor)
             .HasForeignKey(av => av.DoctorId)

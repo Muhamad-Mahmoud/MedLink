@@ -3,7 +3,6 @@ using MedLink.Domain.Entities.Appointments;
 using MedLink.Domain.Entities.User;
 using MedLink.Domain.Enums;
 using NetTopologySuite.Geometries;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MedLink.Domain.Entities.Medical;
 
@@ -21,10 +20,9 @@ public class Doctor : BaseEntity
 
     public string City { get; set; } = string.Empty;
     public Gender Gender { get; set; }
-
+    
     /// Geographic location of doctor's clinic (SRID 4326 = WGS84)
-   // [NotMapped]
-    //public Point Location { get; set; } = null!;
+    public Point Location { get; set; } = null!;
 
     public string? Address { get; set; } = string.Empty;
 
@@ -34,3 +32,4 @@ public class Doctor : BaseEntity
     public int ConsultationFee { get; set; }
     public Point Location { get; set; }
 }
+

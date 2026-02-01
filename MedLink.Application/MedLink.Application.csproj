@@ -2,11 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-    <RootNamespace>MedLink_Application</RootNamespace>
+    <RootNamespace>MedLink.Application</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+    <PackageReference Include="NetTopologySuite" Version="2.5.0" />
+  </ItemGroup>
 
 
   <ItemGroup>

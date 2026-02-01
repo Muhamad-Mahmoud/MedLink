@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Medical_Team_B.Controllers
 {
@@ -6,5 +7,6 @@ namespace Medical_Team_B.Controllers
     [ApiController]
     public class BaseApiController : ControllerBase
     {
+        protected string UserId => User.FindFirstValue("uid")!;
     }
 }

@@ -118,3 +118,4 @@ namespace MedLink.Infrastructure.Persistence.Seed
         }
     }
 }
+

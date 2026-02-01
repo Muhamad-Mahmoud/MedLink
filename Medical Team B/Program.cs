@@ -1,4 +1,5 @@
 using Medical_Team_B.Extensions;
+using Medical_Team_B.Middlewares;
 using MedLink.Domain.Interfaces.Repositories;
 using MedLink.Infrastructure.Persistence.Context;
 using MedLink.Infrastructure.Persistence.Seed;
@@ -54,29 +55,26 @@ var app = builder.Build();
 
 
 /// Used to implememt the migration automateclly after running the project  - instead of Update-Database
-/// //
-var scop = app.Services.CreateScope();
-var services = scop.ServiceProvider;
-var loggerFactory = services.GetRequiredService<ILoggerFactory>();
-try
+using (var scope = app.Services.CreateScope())
 {
-    var context = services.GetRequiredService<ApplicationDbContext>();
-    await context.Database.MigrateAsync();
-    await ApplicationDbContextSeed.SeedAsync(context);
-
-    //var userManager = services.GetRequiredService<UserManager<AppUser>>();
-    //var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-    //await AppIdentityDbContextSeed.SeedUser(userManager);
-    //await AppIdentityDbContextSeed.SeedRoles(roleManager, userManager);
+    var services = scope.ServiceProvider;
+    var loggerFactory = services.GetRequiredService<ILoggerFactory>();
+    try
+    {
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        await context.Database.MigrateAsync();
+        await ApplicationDbContextSeed.SeedAsync(context);
+    }
+    catch (Exception ex)
+    {
+        var logger = loggerFactory.CreateLogger<Program>();
+        logger.LogError(ex, "An error occurred during migration");
+    }
 }
-catch (Exception ex)
-{
 
-    var logger = loggerFactory.CreateLogger<Program>();
-    logger.LogError(ex, "An error occurred during migration");
-
-}
 // Configure the HTTP request pipeline.
+app.UseMiddleware<ExceptionMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
   
@@ -87,6 +85,7 @@ if (app.Environment.IsDevelopment())
         c.RoutePrefix = string.Empty;
     });
 }
+
 app.UseStatusCodePagesWithReExecute("/errors/{0}");
 
 app.UseHttpsRedirection();
