@@ -64,7 +64,7 @@ namespace MedLink.Application.Services
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
             var callbackUrl = $"{_jwt.Issuer}/api/auth/confirm-email?userId={user.Id}&code={code}";
 
-            var message = new EmailMessage([user.Email], "Confirm your email", callbackUrl);
+            var message = new EmailMessage([user.Email], "Confirm Your Email", callbackUrl);
             await _emailService.SendEmailAsync(message);
 
             return new AuthModel
@@ -156,7 +156,7 @@ namespace MedLink.Application.Services
 
             var callback = QueryHelpers.AddQueryString(model.ClientUri, param);
 
-            var message = new EmailMessage([user.Email], "Reset Password Token", callback);
+            var message = new EmailMessage([user.Email], "Reset Your Password", callback);
             await _emailService.SendEmailAsync(message);
 
             return true;
