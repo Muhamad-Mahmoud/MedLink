@@ -1,6 +1,8 @@
 using MedLink.Application.Interfaces.Services;
 using MedLink.Application.Mapping;
 using MedLink.Application.Services;
+using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace Medical_Team_B.Extensions
 {
@@ -12,7 +14,9 @@ namespace Medical_Team_B.Extensions
             services.AddScoped<ISpecializationService, SpecializationService>();
             services.AddScoped<IFavoriteService, FavoriteService>();
 
-            services.AddAutoMapper(typeof(MappingProfile));
+            services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
+            //  services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
 
             return services;
         }

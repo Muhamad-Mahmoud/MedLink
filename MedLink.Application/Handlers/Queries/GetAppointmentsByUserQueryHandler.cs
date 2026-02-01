@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 namespace MedLink_Application.Handlers.Queries
 {
 
+
     public class GetAppointmentsByUserQueryHandler : IRequestHandler<GetAppointmentsByUserQuery, List<AppointmentDto>>
     {
         private readonly IAppointmentRepository _repository;
@@ -29,4 +30,5 @@ namespace MedLink_Application.Handlers.Queries
             return _mapper.Map<List<AppointmentDto>>(appointments);
         }
     }
+
 }

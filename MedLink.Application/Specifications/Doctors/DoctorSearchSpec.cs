@@ -1,13 +1,26 @@
-﻿using System.Linq.Expressions;
+﻿using MedLink.Application.DTOs.Doctors;
+using MedLink.Application.Specifications;
 using MedLink.Domain.Entities.Medical;
 using MedLink_Application.DTOs.Doctors;
 using MedLink_Application.Specifications;
+using NetTopologySuite.Geometries;
+using System.Linq.Expressions;
 
-namespace MedLink.Application.Specifications.Doctors
+namespace MedLink.Application.Specifications.Medical
 {
+    /// <summary>
+    /// Lightweight specification for doctor search listings.
+    /// </summary>
+    /// <remarks>
+    /// Uses a hybrid spatial search strategy (bounding box + distance) for optimal performance.
+    /// Bridges API latitude/longitude inputs with domain-level <see cref="Point"/> location handling.
+    /// </remarks>
     public class DoctorSearchSpec : BaseSpecification<Doctor>
     {
+        private const double MinRadiusKm = 1.0;
         private const double KilometersPerDegree = 111.0;
+        private const double MetersPerKilometer = 1000.0;
+        private const int Srid = 4326;
 
         public DoctorSearchSpec(DoctorSearchParams searchParams)
             : base(BuildCriteria(searchParams))
@@ -19,67 +32,65 @@ namespace MedLink.Application.Specifications.Doctors
 
             var pageIndex = Math.Max(searchParams.PageIndex, 1);
             var pageSize = Math.Max(searchParams.PageSize, 1);
-
-            ApplyPagination(
-                (pageIndex - 1) * pageSize,
-                pageSize
-            );
+            ApplyPagination((pageIndex - 1) * pageSize, pageSize);
         }
 
         private static Expression<Func<Doctor, bool>> BuildCriteria(DoctorSearchParams p)
         {
-            // Prepare inputs
-            var keyword = p.Keyword?.Trim().ToLower();
+            var keyword = p.Keyword?.Trim();
             var hasKeyword = !string.IsNullOrEmpty(keyword);
 
-            var city = p.City?.Trim().ToLower();
+            var city = p.City?.Trim();
             var hasCity = !string.IsNullOrEmpty(city);
 
             var hasLocation = p.Latitude.HasValue && p.Longitude.HasValue;
 
-            // Calculate geographic boundaries => Square Bounding Box
+            Point? searchPoint = null;
+            double radiusMeters = 0;
             double minLat = 0, maxLat = 0, minLng = 0, maxLng = 0;
+
             if (hasLocation)
             {
-                var radiusDeg = p.RadiusInKm / KilometersPerDegree;
+                var radiusKm = Math.Max(p.RadiusInKm, MinRadiusKm);
+                radiusMeters = radiusKm * MetersPerKilometer;
+                searchPoint = CreatePoint(p.Longitude!.Value, p.Latitude!.Value);
+
+                var radiusDeg = radiusKm / KilometersPerDegree;
                 minLat = p.Latitude!.Value - radiusDeg;
                 maxLat = p.Latitude.Value + radiusDeg;
                 minLng = p.Longitude!.Value - radiusDeg;
                 maxLng = p.Longitude.Value + radiusDeg;
             }
 
-            // Date Range Optimization 
-            var availableToday = p.AvailableToday;
+            var filterByAvailability = p.AvailableOnDate;
             var searchDateStart = p.SearchDate.Date;
             var searchDateEnd = searchDateStart.AddDays(1);
 
-            var gender = p.Gender;
-            var hasGender = p.Gender.HasValue;
-
-            var specialtyId = p.SpecialtyId;
-            var hasSpecialty = p.SpecialtyId.HasValue;
-
             return d =>
-                //  Location Logic 
-                (
-                     hasCity ? d.City.ToLower() == city :
-                     hasLocation ?
-                     (d.Latitude >= minLat && d.Latitude <= maxLat &&
-                                    d.Longitude >= minLng && d.Longitude <= maxLng) :
-                     true
-                )
+                // Location filter: City > Coordinates > None
+                (hasCity
+                    ? (d.City != null && d.City == city)
+                    : hasLocation
+                        ? (d.Location != null &&
+                           d.Location.Y >= minLat && d.Location.Y <= maxLat &&
+                           d.Location.X >= minLng && d.Location.X <= maxLng &&
+                           d.Location.Distance(searchPoint) <= radiusMeters)
+                        : true)
 
-                //  Keyword 
+                // Keyword in name or specialty
                 && (!hasKeyword || (
-                    d.Name.Contains(keyword!) ||
-                    (d.Specialization != null && d.Specialization.Name.ToLower().Contains(keyword!))
-                ))
+                    (d.Name != null && d.Name.Contains(keyword!)) ||
+                    (d.Specialization != null && d.Specialization.Name != null &&
+                     d.Specialization.Name.Contains(keyword!))))
 
-                //  Filters 
-                && (!hasGender || d.Gender == gender)
-                && (!hasSpecialty || d.SpecialtyId == specialtyId)
-                && (!availableToday || d.Availabilities.Any(a =>
+                // Filters
+                && (!p.Gender.HasValue || d.Gender == p.Gender)
+                && (!p.SpecialtyId.HasValue || d.SpecialtyId == p.SpecialtyId)
+                && (!filterByAvailability || d.Availabilities.Any(a =>
                        a.Date >= searchDateStart && a.Date < searchDateEnd));
         }
+
+        private static Point CreatePoint(double longitude, double latitude) =>
+            new Point(longitude, latitude) { SRID = Srid };
     }
 }

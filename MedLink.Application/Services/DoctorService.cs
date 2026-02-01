@@ -2,6 +2,7 @@ using AutoMapper;
 using MedLink.Application.DTOs.Doctors;
 using MedLink.Application.Interfaces.Services;
 using MedLink.Application.Specifications.Doctors;
+using MedLink.Application.Specifications.Medical;
 using MedLink.Domain.Entities.Medical;
 using MedLink_Application.DTOs.Doctors;
 using MedLink_Application.Interfaces.Persistence;

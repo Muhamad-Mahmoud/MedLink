@@ -6,11 +6,11 @@ namespace MedLink_Application.Queries
 {
     public class GetAppointmentByIdQuery : IRequest<AppointmentDto>
     {
-        public int Id { get; set; }
+        public int AppointmentId { get; set; }
 
-        public GetAppointmentByIdQuery(int id)
+        public GetAppointmentByIdQuery(int appointmentId)
         {
-            Id = id;
+            AppointmentId = appointmentId;
         }
 
     }

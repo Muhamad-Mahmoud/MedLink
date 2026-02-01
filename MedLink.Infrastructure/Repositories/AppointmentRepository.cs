@@ -21,45 +21,73 @@ namespace MedLink.Infrastructure.Repositories
         }
 
         public async Task<Appointment?> GetByIdAsync(int id)
-            => await _context.Appointments.Include(a => a.Schedule).FirstOrDefaultAsync(a => a.Id == id);
+        {
+            return await _context.Appointments
+                .FirstOrDefaultAsync(a => a.Id == id && !a.IsDeleted);
+        }
+
+        public async Task<Appointment?> GetByIdWithDetailsAsync(int id)
+        {
+            return await _context.Appointments
+                .Include(a => a.Doctor)
+                .Include(a => a.Schedule)
+                .Include(a => a.Payment)
+                .Include(a => a.BookedByUser)
+                .FirstOrDefaultAsync(a => a.Id == id && !a.IsDeleted);
+        }
 
         public async Task<List<Appointment>> GetAppointmentsByDoctorAsync(int doctorId, DateTime? date = null)
-            => await _context.Appointments
-                .Where(a => a.DoctorId == doctorId && (date == null || a.Schedule.Date == date.Value.Date))
+        {
+            var query = _context.Appointments
                 .Include(a => a.Schedule)
-                .ToListAsync();
+                .Include(a => a.Payment)
+                .Where(a => a.DoctorId == doctorId && !a.IsDeleted);
+
+            if (date.HasValue)
+            {
+                query = query.Where(a => a.Schedule.Date.Date == date.Value.Date);
+            }
+
+            return await query.OrderBy(a => a.Schedule.Date).ThenBy(a => a.Schedule.StartTime).ToListAsync();
+        }
 
         public async Task<List<Appointment>> GetAppointmentsByUserAsync(string userId)
-            => await _context.Appointments
-                .Where(a => a.BookedByUserId == userId)
+        {
+            return await _context.Appointments
+                .Include(a => a.Doctor)
                 .Include(a => a.Schedule)
+                .Include(a => a.Payment)
+                .Where(a => a.BookedByUserId == userId && !a.IsDeleted)
+                .OrderByDescending(a => a.CreatedAt)
                 .ToListAsync();
+        }
 
-        public async Task AddAsync(Appointment appointment)
+        public async Task<Appointment> AddAsync(Appointment appointment)
         {
             await _context.Appointments.AddAsync(appointment);
             await _context.SaveChangesAsync();
+            return appointment;
         }
 
-        public async Task UpdateAsync(Appointment appointment)
+        public async Task<Appointment> UpdateAsync(Appointment appointment)
         {
+            appointment.UpdatedAt = DateTime.UtcNow;
+            _context.Appointments.Update(appointment);
+            await _context.SaveChangesAsync();
+            return appointment;
+        }
+
+        public async Task DeleteAsync(Appointment appointment)
+        {
+            appointment.IsDeleted = true;
+            appointment.UpdatedAt = DateTime.UtcNow;
             _context.Appointments.Update(appointment);
             await _context.SaveChangesAsync();
         }
 
-        public async Task CancelAsync(Appointment appointment, string reason)
+        public async Task<bool> ExistsAsync(int id)
         {
-            appointment.Status =AppointmentStatus.Cancelled;
-            appointment.CancelledReason = reason;
-            _context.Appointments.Update(appointment);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task ConfirmAsync(Appointment appointment)
-        {
-            appointment.Status =AppointmentStatus.Confirmed;
-            _context.Appointments.Update(appointment);
-            await _context.SaveChangesAsync();
+            return await _context.Appointments.AnyAsync(a => a.Id == id && !a.IsDeleted);
         }
     }
 }

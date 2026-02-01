@@ -15,11 +15,13 @@ namespace MedLink_Application.Handlers.Queries
             _repository = repository;
             _mapper = mapper;
         }
+
         public async Task<AppointmentDto> Handle(GetAppointmentByIdQuery request, CancellationToken cancellationToken)
         {
-            var appointment = await _repository.GetByIdAsync(request.Id);
+            var appointment = await _repository.GetByIdWithDetailsAsync(request.AppointmentId);
+
             if (appointment == null)
-                throw new KeyNotFoundException("Appointment not found");
+                throw new KeyNotFoundException($"Appointment with ID {request.AppointmentId} not found");
 
             return _mapper.Map<AppointmentDto>(appointment);
         }

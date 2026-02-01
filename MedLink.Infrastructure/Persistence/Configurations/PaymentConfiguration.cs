@@ -30,8 +30,9 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
             .IsRequired();
 
         builder.HasOne(p => p.Appointment)
-            .WithMany()
-            .HasForeignKey(p => p.AppointmentId)
-            .OnDelete(DeleteBehavior.Restrict);
+        .WithOne(a => a.Payment)
+        .HasForeignKey<Payment>(p => p.AppointmentId)
+        .OnDelete(DeleteBehavior.Restrict);
+
     }
 }

@@ -1,21 +1,12 @@
 ﻿using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace MedLink_Application.Commands
 {
-    public class CancelAppointmentCommand : IRequest<bool>
+    public class CancelAppointmentCommand : IRequest<Unit>
     {
         public int AppointmentId { get; set; }
-        public string Reason { get; set; }
-
-        public CancelAppointmentCommand(int appointmentId, string reason)
-        {
-            AppointmentId = appointmentId;
-            Reason = reason;
-        }
+        public string Reason { get; set; } = string.Empty;
+        public string CancelledByUserId { get; set; } = string.Empty;
     }
 }
