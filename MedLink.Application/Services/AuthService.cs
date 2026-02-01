@@ -1,23 +1,17 @@
 using AutoMapper;
-using MedLink.Domain.Identity;
-using MedLink.Application.Common.JWT;
-using MedLink.Application.DTOs.Identity;
-using MedLink.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Net.Mail;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 using MedLink_Application.DTOs.Identity;
 using MedLink_Application.Interfaces.Services;
+using MedLink_Application.Common.JWT;
+using NETCore.MailKit.Core;
+using MedLink.Domain.Identity;
 
 namespace MedLink.Application.Services
 {
