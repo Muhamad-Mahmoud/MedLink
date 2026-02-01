@@ -44,6 +44,7 @@ namespace MedLink.Application.Services
 
             var user = _mapper.Map<ApplicationUser>(model);
 
+
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (!result.Succeeded)

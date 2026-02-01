@@ -43,8 +43,8 @@ builder.Services.AddSwaggerGen(Options =>
         Contact = new Microsoft.OpenApi.Models.OpenApiContact
         {
             Name = "Ahmed Selim",
-            Email = "ahkdddd555@gmail.com",
-            Url = new Uri("http://YourWebSit.eg ")
+            //Email = "ahkdddd555@gmail.com",
+            //Url = new Uri("http://YourWebSit.eg ")
         }
     });
 });
