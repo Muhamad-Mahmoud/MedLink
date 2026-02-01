@@ -39,7 +39,9 @@ namespace Medical_Team_B.Middlewares
                     case NotFoundException notFoundException:
                         statusCode = (int)HttpStatusCode.NotFound;
                         break;
-                    // You can add more custom exceptions here later (e.g., ValidationException -> 400)
+                    case BadRequestException badRequestException:
+                        statusCode = (int)HttpStatusCode.BadRequest;
+                        break;
                     default:
                         statusCode = (int)HttpStatusCode.InternalServerError;
                         break;

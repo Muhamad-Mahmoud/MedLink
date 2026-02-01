@@ -4,6 +4,7 @@ using MedLink.Application.Common.JWT;
 using MedLink.Application.DTOs.Identity;
 using MedLink.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -11,39 +12,44 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using MedLink_Application.DTOs.Identity;
+using MedLink_Application.Interfaces.Services;
 
 namespace MedLink.Application.Services
 {
     public class AuthService : IAuthService
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly Jwt _jwt;
         private readonly IMapper _mapper;
+        private readonly IEmailService _emailService;
+        private readonly ISmsService _smsService;
 
-        public AuthService(UserManager<ApplicationUser> userManager, IOptions<Jwt> jwt, IMapper mapper)
+        public AuthService(UserManager<ApplicationUser> userManager, IOptions<Jwt> jwt, IMapper mapper, RoleManager<IdentityRole> roleManager, IEmailService emailService, ISmsService smsService)
         {
             _userManager = userManager;
             _jwt = jwt.Value;
             _mapper = mapper;
+            _roleManager = roleManager;
+            _emailService = emailService;
+            _smsService = smsService;
         }
 
 
         public async Task<AuthModel> RegisterAsync(RegisterModel model)
         {
-
             var isEmail = new EmailAddressAttribute().IsValid(model.Email);
-
             var existingUser = await _userManager.FindByEmailAsync(model.Email);
-
 
             if (existingUser is not null)
                 return new AuthModel { Message = "User already registered" };
 
             var user = _mapper.Map<ApplicationUser>(model);
-
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (!result.Succeeded)
@@ -54,33 +60,42 @@ namespace MedLink.Application.Services
 
             await _userManager.AddToRoleAsync(user, "User");
 
-            var token = await CreateJwtToken(user);
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+            var callbackUrl = $"{_jwt.Issuer}/api/auth/confirm-email?userId={user.Id}&code={code}";
+
+            var message = new EmailMessage([user.Email], "Confirm Your Email", callbackUrl);
+            await _emailService.SendEmailAsync(message);
 
             return new AuthModel
             {
-                Message = "Email was registered successfully",
+                Message = "User registered successfully. Please verify your email.",
+                IsAuthenticated = false,
                 Email = user.Email,
-                Username = model.Email.Split('@')[0],
-                IsAuthenticated = true,
-                ExpiresOn = token.ValidTo,
-                Roles = new List<string> { "User" },
-                Token = new JwtSecurityTokenHandler().WriteToken(token)
+                Username = model.Email.Split('@')[0]
             };
-
-
         }
-
-
 
         public async Task<AuthModel> GetTokenAsync(RequestTokenModel model)
         {
             var authModel = new AuthModel();
-
             var user =  await _userManager.FindByEmailAsync(model.Email);
 
             if (user is null || !await _userManager.CheckPasswordAsync(user, model.Password))
             {
-                authModel.Message = "Email/Phone or Password is incorrect!";
+                authModel.Message = "Email or Password is incorrect!";
+                return authModel;
+            }
+
+            if (!user.EmailConfirmed)
+            {
+                authModel.Message = "Email is not confirmed";
+                return authModel;
+            }
+
+            if (user.IsDeleted)
+            {
+                authModel.Message = "Account is deleted";
                 return authModel;
             }
 
@@ -99,11 +114,78 @@ namespace MedLink.Application.Services
 
 
 
+        public async Task<string> AddRoleAsync(AddRoleModel model)
+        {
+            var user = await _userManager.FindByIdAsync(model.UserId);
+
+            if (user is null || !await _roleManager.RoleExistsAsync(model.Role))
+                return "Invalid User ID or Role";
+
+            if (await _userManager.IsInRoleAsync(user, model.Role))
+                return "User already assigned to this role";
+
+            var result = await _userManager.AddToRoleAsync(user, model.Role);
+
+            return result.Succeeded ? string.Empty : "Something went wrong";
+
+        }
 
 
 
 
 
+        public async Task<bool> ForgotPasswordAsync(ForgotPasswordModel model)
+        {
+
+
+            var user = await _userManager.FindByEmailAsync(model.Email!);
+
+            if (user is null)
+                return false;
+
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+
+            var param = new Dictionary<string, string?>
+            {
+                {"token",token},
+                {"email",model.Email }
+            };
+
+
+            var callback = QueryHelpers.AddQueryString(model.ClientUri, param);
+
+            var message = new EmailMessage([user.Email], "Reset Your Password", callback);
+            await _emailService.SendEmailAsync(message);
+
+            return true;
+
+        }
+
+
+
+
+        public async Task<ResetPasswordResult> ResetPasswordAsync(ResetPasswordModel model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email!);
+
+            if (user is null)
+                return new ResetPasswordResult(false, "user not found Request");
+
+
+            var result = await _userManager.ResetPasswordAsync(user, model.Token!, model.Password!);
+
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                return new ResetPasswordResult(false, errors);
+
+            }
+
+            return new ResetPasswordResult(true, "Password Changed Successfully");
+
+        }
 
 
 
@@ -165,5 +247,159 @@ namespace MedLink.Application.Services
         }
 
 
+        public async Task<string> SendPhoneVerificationAsync(string email, string phoneNumber)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return "User not found";
+
+            if (!phoneNumber.StartsWith("+"))
+                phoneNumber = "+" + phoneNumber;
+            
+            try
+            {
+                var status = await _smsService.SendVerificationTokenAsync(phoneNumber);
+                return $"Verification code sent to {phoneNumber}. Status: {status}";
+            }
+            catch (Exception ex)
+            {
+                return $"Failed to send verification code: {ex.Message}";
+            }
+        }
+
+        public async Task<string> ConfirmPhoneNumberAsync(string email, string code, string phoneNumber)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return "User not found";
+
+            if (!phoneNumber.StartsWith("+"))
+                phoneNumber = "+" + phoneNumber;
+
+            try
+            {
+                var isValid = await _smsService.VerifyTokenAsync(phoneNumber, code);
+                if (!isValid) return "Invalid code";
+
+                user.PhoneNumber = phoneNumber;
+                user.PhoneNumberConfirmed = true;
+                await _userManager.UpdateAsync(user);
+
+                return "Phone number confirmed successfully";
+            }
+            catch (Exception ex)
+            {
+                return $"Verification failed: {ex.Message}";
+            }
+        }
+
+        public async Task<AuthModel> LoginWithGoogleAsync(string email, string name, string googleId)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user != null && user.IsDeleted)
+                return new AuthModel { Message = "Account is deleted" };
+
+            if (user == null)
+            {
+                // Create user if not exists
+                user = new ApplicationUser
+                {
+                    UserName = email.Split('@')[0],
+                    Email = email,
+                    FullName = name,
+                    EmailConfirmed = true // Trusted source
+                };
+
+                var result = await _userManager.CreateAsync(user);
+                if (!result.Succeeded)
+                {
+                     var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                     return new AuthModel { Message = errors };
+                }
+
+                await _userManager.AddToRoleAsync(user, "User");
+                await _userManager.AddLoginAsync(user, new UserLoginInfo("Google", googleId, "Google"));
+            }
+            else
+            {
+                 // Ensure login is linked
+                 var logins = await _userManager.GetLoginsAsync(user);
+                 if (!logins.Any(l => l.LoginProvider == "Google" && l.ProviderKey == googleId))
+                 {
+                     await _userManager.AddLoginAsync(user, new UserLoginInfo("Google", googleId, "Google"));
+                 }
+            }
+
+            var token = await CreateJwtToken(user);
+
+            return new AuthModel
+            {
+                Message = "Login successful",
+                IsAuthenticated = true,
+                Token = new JwtSecurityTokenHandler().WriteToken(token),
+                Email = user.Email,
+                Username = user.UserName,
+                Roles = (await _userManager.GetRolesAsync(user)).ToList(),
+                ExpiresOn = token.ValidTo
+            };
+        }
+        public async Task<string> ConfirmEmailAsync(string userId, string code)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return "User not found";
+
+            code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+            var result = await _userManager.ConfirmEmailAsync(user, code);
+
+            return result.Succeeded ? "Email confirmed successfully" : "Error confirming email";
+        }
+
+        public async Task<string> DeleteAccountAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return "User not found";
+
+            user.IsDeleted = true;
+            var result = await _userManager.UpdateAsync(user);
+
+            return result.Succeeded ? "Account deleted successfully" : "Error deleting account";
+        }
+
+        public async Task<AuthModel> RestoreAccountAsync(RequestTokenModel model)
+        {
+            var authModel = new AuthModel();
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if (user is null || !await _userManager.CheckPasswordAsync(user, model.Password))
+            {
+                authModel.Message = "Email or Password is incorrect!";
+                return authModel;
+            }
+
+            if (!user.IsDeleted)
+            {
+                authModel.Message = "Account is not deleted";
+                return authModel;
+            }
+
+            user.IsDeleted = false;
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                authModel.Message = "Error restoring account";
+                return authModel;
+            }
+
+            var token = await CreateJwtToken(user);
+            authModel.Message = "Account restored and logged in successfully";
+            authModel.IsAuthenticated = true;
+            authModel.Email = user.Email;
+            authModel.Username = user.UserName;
+            authModel.Roles = (await _userManager.GetRolesAsync(user)).ToList();
+            authModel.ExpiresOn = token.ValidTo;
+            authModel.Token = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return authModel;
+        }
     }
 }

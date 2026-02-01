@@ -4,6 +4,7 @@ using MedLink.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 
@@ -12,9 +13,11 @@ using NetTopologySuite.Geometries;
 namespace MedLink.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260131204659_AddIsDeletedToUser")]
+    partial class AddIsDeletedToUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -177,7 +180,7 @@ namespace MedLink.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ContactInformation")
+                    b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -186,18 +189,6 @@ namespace MedLink.Infrastructure.Migrations
 
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("PrivacyPolicy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ReleaseNotes")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TermsOfService")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -236,30 +227,6 @@ namespace MedLink.Infrastructure.Migrations
                     b.ToTable("FAQs");
                 });
 
-            modelBuilder.Entity("MedLink.Domain.Entities.Content.Language", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Languages");
-                });
-
             modelBuilder.Entity("MedLink.Domain.Entities.Medical.Doctor", b =>
                 {
                     b.Property<int>("Id")
@@ -292,9 +259,6 @@ namespace MedLink.Infrastructure.Migrations
                     b.Property<string>("ImageUrl")
                         .HasMaxLength(512)
                         .HasColumnType("nvarchar(512)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
 
                     b.Property<Point>("Location")
                         .IsRequired()

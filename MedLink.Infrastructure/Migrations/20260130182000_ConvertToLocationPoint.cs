@@ -27,7 +27,7 @@ namespace MedLink.Infrastructure.Migrations
                 name: "Location",
                 table: "Doctors",
                 type: "geography",
-                nullable: false);
+                nullable: true);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Doctors_Specializations_SpecialtyId",
