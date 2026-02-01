@@ -6,12 +6,7 @@ using MedLink.Application.Interfaces.Persistence;
 using MedLink.Application.Interfaces.Services;
 using MedLink.Application.Mapping;
 using MedLink.Application.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using MedLink_Application.Interfaces.Persistence;
-using MedLink_Application.Interfaces.Services;
-using MedLink_Application.Mapping;
-using MedLink_Application.Services;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Medical_Team_B.Extensions

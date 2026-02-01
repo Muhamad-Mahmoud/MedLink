@@ -5,7 +5,6 @@ using MedLink.Infrastructure.Persistence.Context;
 using MedLink.Infrastructure.Persistence.Seed;
 using MedLink.Infrastructure.Repositories;
 using MedLink_Application.Interfaces.Repositories;
-using MedLink_Application.Mappers;
 using MedLink_Application.Queries;
 using MedLink_Application.Services;
 using Microsoft.EntityFrameworkCore;

@@ -26,7 +26,6 @@ namespace MedLink.Application.DTOs.Doctors
         public double? Longitude { get; set; }
         public double RadiusInKm { get; set; } = 10;
         public DateTime SearchDate { get; set; } = DateTime.Today;
-        public bool AvailableOnDate { get; internal set; }
     }
 }
 

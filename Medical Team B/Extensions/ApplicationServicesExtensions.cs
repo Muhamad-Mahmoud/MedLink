@@ -14,7 +14,10 @@ namespace Medical_Team_B.Extensions
             services.AddScoped<ISpecializationService, SpecializationService>();
             services.AddScoped<IFavoriteService, FavoriteService>();
 
-            services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
+            services.AddAutoMapper(cfg =>
+            {
+                cfg.AddProfile<MappingProfile>();
+            });
             //  services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
 

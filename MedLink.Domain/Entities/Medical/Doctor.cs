@@ -30,6 +30,5 @@ public class Doctor : BaseEntity
     public ICollection<DoctorAvailability> Availabilities { get; set; } = new List<DoctorAvailability>();
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
     public int ConsultationFee { get; set; }
-    public Point Location { get; set; }
 }
 
