@@ -9,8 +9,9 @@ namespace MedLink_Application.Interfaces.Services
 {
     public interface IProfileAppointmentService
     {
-        Task<IReadOnlyList<AppointmentListItemDto>> GetUpcomingAsync(string userId);
-        Task<IReadOnlyList<AppointmentListItemDto>> GetPastAsync(string userId);
+        Task<PagedResult<AppointmentListItemDto>> GetPastAsync(string userId, int page, int pageSize);
+
+        Task<PagedResult<AppointmentListItemDto>> GetUpcomingAsync(string userId, int page, int pageSize);
 
         Task CancelAsync(
             string userId,

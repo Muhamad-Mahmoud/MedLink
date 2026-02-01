@@ -1,4 +1,5 @@
 ﻿using MedLink_Application.Interfaces.Specifications;
+using System.Linq.Expressions;
 
 namespace MedLink_Application.Interfaces.Persistence
 {

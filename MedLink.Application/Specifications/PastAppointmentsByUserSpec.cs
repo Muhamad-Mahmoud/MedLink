@@ -1,6 +1,5 @@
 ﻿using MedLink.Domain.Entities.Appointments;
 using MedLink.Domain.Enums;
-using Microsoft.EntityFrameworkCore;
 
 namespace MedLink_Application.Specifications
 {
@@ -20,14 +19,24 @@ namespace MedLink_Application.Specifications
                 )
             )
         {
-            AddIncludes(q =>
-                q.Include(a => a.Doctor)
-                 .ThenInclude(d => d.Specialization)
-            );
-
-            AddIncludes(q => q.Include(a => a.Schedule));
+            AddIncludes(a => a.Doctor);
+            AddIncludes(a => a.Doctor.Specialization);
+            AddIncludes(a => a.Schedule);
 
             AddOrderByDesc(a => a.Schedule.Date);
         }
+
+        public PastAppointmentsByUserSpec(
+            string userId,
+            int page,
+            int pageSize)
+            : this(userId)
+        {
+            ApplyPagination(
+                (page - 1) * pageSize,
+                pageSize
+            );
+        }
     }
 }
+

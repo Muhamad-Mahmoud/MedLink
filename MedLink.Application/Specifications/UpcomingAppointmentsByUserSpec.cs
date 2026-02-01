@@ -25,15 +25,24 @@ namespace MedLink_Application.Specifications
                 )
             )
         {
-            AddIncludes(q =>
-                q.Include(a => a.Doctor)
-                 .ThenInclude(d => d.Specialization)
-            );
-
-            AddIncludes(q => q.Include(a => a.Schedule));
+            AddIncludes(a => a.Doctor);
+            AddIncludes(a => a.Doctor.Specialization);
+            AddIncludes(a => a.Schedule);
 
             AddOrderBy(a => a.Schedule.Date);
         }
+
+        public UpcomingAppointmentsByUserSpec(
+           string userId,
+           int page,
+           int pageSize)
+           : this(userId)
+            {
+                ApplyPagination(
+                    (page - 1) * pageSize,
+                    pageSize
+                );
+            }
     }
 
 

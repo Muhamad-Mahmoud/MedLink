@@ -1,18 +1,23 @@
 ﻿using MedLink.Domain.Entities.Appointments;
 using MedLink.Domain.Entities.User;
 using MedLink.Domain.Enums;
+using MedLink.Domain.Identity;
 using MedLink_Application.DTOs.UserProfile;
 using MedLink_Application.Interfaces.Persistence;
 using MedLink_Application.Interfaces.Services;
 using MedLink_Application.Specifications;
+using Microsoft.AspNetCore.Identity;
 
 public class ProfileDashboardService : IProfileDashboardService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public ProfileDashboardService(IUnitOfWork unitOfWork)
+
+    public ProfileDashboardService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager)
     {
         _unitOfWork = unitOfWork;
+        _userManager = userManager;
     }
 
     public async Task<UserProfileDashboardDto> GetMyDashboardAsync(string userId)
@@ -22,7 +27,12 @@ public class ProfileDashboardService : IProfileDashboardService
             .FindAsync(x => x.UserId == userId);
 
         if (profile == null)
-            throw new Exception("User profile not found");
+            throw new KeyNotFoundException("User profile not found");
+
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+            throw new KeyNotFoundException("User not found");
 
         var totalAppointments = await _unitOfWork
             .Repository<Appointment>()
@@ -30,31 +40,26 @@ public class ProfileDashboardService : IProfileDashboardService
 
         var upcomingAppointments = await _unitOfWork
             .Repository<Appointment>()
-            .GetCountAsync(
-                new UpcomingAppointmentsSpec(userId)
-            );
-
+            .GetCountAsync(new UpcomingAppointmentsSpec(userId));
 
         var favoriteDoctorsCount = await _unitOfWork
             .Repository<Favorite>()
             .GetCountAsync(new FavoritesByUserSpec(userId));
-
 
         return new UserProfileDashboardDto
         {
             Profile = new ProfileHeaderDto
             {
                 FullName = profile.FullName,
-                Email = "", // من JWT
+                Email = user.Email ?? "",
                 ImageUrl = profile.ImageUrl,
                 MemberSince = profile.CreatedAt
             },
-
             TotalAppointments = totalAppointments,
             UpcomingAppointments = upcomingAppointments,
             FavoriteDoctorsCount = favoriteDoctorsCount
         };
-
     }
+
 
 }

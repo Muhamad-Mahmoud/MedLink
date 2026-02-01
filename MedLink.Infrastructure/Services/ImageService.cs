@@ -18,15 +18,19 @@ namespace MedLink_Application.Services
             if (file == null || file.Length == 0)
                 throw new ArgumentException("Invalid image file");
 
-            var imagesPath = Path.Combine(_env.WebRootPath, "images");
+            var imagesPath = Path.Combine(
+                _env.ContentRootPath,
+                "wwwroot",
+                "images"
+            );
 
             if (!Directory.Exists(imagesPath))
                 Directory.CreateDirectory(imagesPath);
 
             var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-            var path = Path.Combine(imagesPath, fileName);
+            var fullPath = Path.Combine(imagesPath, fileName);
 
-            using var stream = new FileStream(path, FileMode.Create);
+            using var stream = new FileStream(fullPath, FileMode.Create);
             await file.CopyToAsync(stream);
 
             return $"/images/{fileName}";
@@ -38,7 +42,8 @@ namespace MedLink_Application.Services
                 return Task.CompletedTask;
 
             var fullPath = Path.Combine(
-                _env.WebRootPath,
+                _env.ContentRootPath,
+                "wwwroot",
                 imageUrl.TrimStart('/')
             );
 
@@ -49,3 +54,4 @@ namespace MedLink_Application.Services
         }
     }
 }
+

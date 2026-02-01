@@ -22,12 +22,14 @@ namespace MedLink_Application.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly Jwt _jwt;
         private readonly IMapper _mapper;
+        private readonly IProfileService _userProfileService;
 
-        public AuthService(UserManager<ApplicationUser> userManager, IOptions<Jwt> jwt, IMapper mapper)
+        public AuthService(UserManager<ApplicationUser> userManager, IOptions<Jwt> jwt, IMapper mapper, IProfileService userProfileService)
         {
             _userManager = userManager;
             _jwt = jwt.Value;
             _mapper = mapper;
+            _userProfileService = userProfileService;
         }
 
 
@@ -51,6 +53,9 @@ namespace MedLink_Application.Services
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                 return new AuthModel { Message = errors };
             }
+
+            await _userProfileService.CreateAsync(user.Id, model.FullName);
+
 
             await _userManager.AddToRoleAsync(user, "User");
 
@@ -96,32 +101,6 @@ namespace MedLink_Application.Services
             return authModel;
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         private async Task<JwtSecurityToken> CreateJwtToken(ApplicationUser user)
         {
             var userClaims = await _userManager.GetClaimsAsync(user);
@@ -130,7 +109,7 @@ namespace MedLink_Application.Services
 
             foreach (var role in roles)
             {
-                roleClaims.Add(new Claim("roles", role));
+                roleClaims.Add(new Claim(ClaimTypes.Role, role));
             }
 
             var claims = new List<Claim>

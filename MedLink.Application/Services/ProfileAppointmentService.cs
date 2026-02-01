@@ -21,99 +21,134 @@ namespace MedLink.Infrastructure.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task CancelAsync(string userId, int appointmentId, string? reason)
+        //public async Task CancelAsync(string userId, int appointmentId, string? reason)
+        //{
+        //    var appointment = await _unitOfWork
+        //        .Repository<Appointment>()
+        //        .GetByIdAsync(appointmentId);
+
+        //    if (appointment == null)
+        //        throw new Exception("Appointment not found");
+
+        //    if (appointment.UserId != userId)
+        //        throw new UnauthorizedAccessException();
+
+        //    if (appointment.Status == AppointmentStatus.Cancelled)
+        //        return;
+
+        //    var isPast =
+        //        appointment.Schedule.Date < DateTime.UtcNow.Date ||
+        //        (
+        //            appointment.Schedule.Date == DateTime.UtcNow.Date &&
+        //            appointment.Schedule.StartTime < DateTime.UtcNow.TimeOfDay
+        //        );
+
+        //    if (isPast)
+        //        throw new Exception("Cannot cancel past appointment");
+
+        //    appointment.Status = AppointmentStatus.Cancelled;
+        //    appointment.CancelledReason = reason;
+
+        //    var availability = await _unitOfWork
+        //        .Repository<DoctorAvailability>()
+        //        .GetByIdAsync(appointment.ScheduleId);
+
+        //    if (availability != null)
+        //    {
+        //        availability.IsBooked = false;
+        //        _unitOfWork.Repository<DoctorAvailability>().Update(availability);
+        //    }
+
+        //    _unitOfWork.Repository<Appointment>().Update(appointment);
+        //    await _unitOfWork.Complete();
+        //}
+
+
+        public async Task<PagedResult<AppointmentListItemDto>> GetPastAsync(string userId, int page, int pageSize)
         {
-            var appointment = await _unitOfWork
+            page = page <= 0 ? 1 : page;
+            pageSize = pageSize <= 0 ? 10 : pageSize;
+
+            var dataSpec = new PastAppointmentsByUserSpec(userId, page, pageSize);
+            var countSpec = new PastAppointmentsByUserSpec(userId);
+
+            var totalCount = await _unitOfWork
                 .Repository<Appointment>()
-                .GetByIdAsync(appointmentId);
-
-            if (appointment == null)
-                throw new Exception("Appointment not found");
-
-            if (appointment.UserId != userId)
-                throw new UnauthorizedAccessException();
-
-            if (appointment.Status == AppointmentStatus.Cancelled)
-                return;
-
-            var isPast =
-                appointment.Schedule.Date < DateTime.UtcNow.Date ||
-                (
-                    appointment.Schedule.Date == DateTime.UtcNow.Date &&
-                    appointment.Schedule.StartTime < DateTime.UtcNow.TimeOfDay
-                );
-
-            if (isPast)
-                throw new Exception("Cannot cancel past appointment");
-
-            appointment.Status = AppointmentStatus.Cancelled;
-            appointment.CancelledReason = reason;
-
-            _unitOfWork.Repository<Appointment>().Update(appointment);
-            await _unitOfWork.Complete();
-        }
-
-
-        public async Task<IReadOnlyList<AppointmentListItemDto>> GetPastAsync(string userId)
-        {
-            var spec = new PastAppointmentsByUserSpec(userId);
+                .GetCountAsync(countSpec);
 
             var appointments = await _unitOfWork
                 .Repository<Appointment>()
-                .GetAllWithSpecAsync(spec);
+                .GetAllWithSpecAsync(dataSpec);
 
-            return appointments.Select(a => new AppointmentListItemDto
+            var items = appointments.Select(a => new AppointmentListItemDto
             {
                 AppointmentId = a.Id,
-
                 DoctorName = a.Doctor.Name,
                 DoctorImageUrl = a.Doctor.ImageUrl ?? "",
                 Specialization = a.Doctor.Specialization.Name,
-
                 Date = a.Schedule.Date,
                 StartTime = a.Schedule.StartTime,
-
                 Status = a.Status,
-
                 CanCancel = false
-            })
-            .ToList();
+            }).ToList();
+
+            return new PagedResult<AppointmentListItemDto>
+            {
+                Items = items,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = totalCount
+            };
         }
 
-
-        public async Task<IReadOnlyList<AppointmentListItemDto>> GetUpcomingAsync(string userId)
+        public async Task<PagedResult<AppointmentListItemDto>> GetUpcomingAsync(string userId, int page, int pageSize)
         {
-            var spec = new UpcomingAppointmentsByUserSpec(userId);
+            page = page <= 0 ? 1 : page;
+            pageSize = pageSize <= 0 ? 10 : pageSize;
+
+            var dataSpec = new UpcomingAppointmentsByUserSpec(userId, page, pageSize);
+            var countSpec = new UpcomingAppointmentsByUserSpec(userId);
+
+            var totalCount = await _unitOfWork
+                .Repository<Appointment>()
+                .GetCountAsync(countSpec);
 
             var appointments = await _unitOfWork
                 .Repository<Appointment>()
-                .GetAllWithSpecAsync(spec);
+                .GetAllWithSpecAsync(dataSpec);
 
-            return appointments.Select(a => new AppointmentListItemDto
+            var now = DateTime.UtcNow;
+
+            var items = appointments.Select(a =>
             {
-                AppointmentId = a.Id,
+                var appointmentDateTime =
+                    a.Schedule.Date.Date + a.Schedule.StartTime;
 
-                DoctorName = a.Doctor.Name,
-                DoctorImageUrl = a.Doctor.ImageUrl ?? "",
-                Specialization = a.Doctor.Specialization.Name,
+                var canCancel =
+                    (a.Status == AppointmentStatus.Pending ||
+                     a.Status == AppointmentStatus.Confirmed)
+                    && appointmentDateTime > now;
 
-                Date = a.Schedule.Date,
-                StartTime = a.Schedule.StartTime,
+                return new AppointmentListItemDto
+                {
+                    AppointmentId = a.Id,
+                    DoctorName = a.Doctor.Name,
+                    DoctorImageUrl = a.Doctor.ImageUrl ?? "",
+                    Specialization = a.Doctor.Specialization.Name,
+                    Date = a.Schedule.Date,
+                    StartTime = a.Schedule.StartTime,
+                    Status = a.Status,
+                    CanCancel = canCancel
+                };
+                }).ToList();
 
-                Status = a.Status,
-
-                CanCancel =
-                    a.Status != AppointmentStatus.Cancelled &&
-                    (
-                        a.Schedule.Date > DateTime.UtcNow.Date ||
-                        (
-                            a.Schedule.Date == DateTime.UtcNow.Date &&
-                            a.Schedule.StartTime > DateTime.UtcNow.TimeOfDay
-                        )
-                    ),
-            })
-            .ToList();
+            return new PagedResult<AppointmentListItemDto>
+            {
+                Items = items,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = totalCount
+            };
         }
-
     }
 }

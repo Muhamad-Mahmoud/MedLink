@@ -9,11 +9,9 @@ namespace MedLink_Application.Interfaces.Services
 {
         public interface IProfileService
         {
+        Task CreateAsync(string userId, string fullName);
         Task<EditProfileDto> GetMyProfileAsync(
-            string userId,
-            string email,
-            string phoneNumber
-            );
+            string userId);
 
             Task UpdateMyProfileAsync(string userId, UpdateProfileDto dto);
 
