@@ -166,5 +166,19 @@ namespace Medical_Team_B.Controllers
             var result = await _authService.DeleteAccountAsync(userId);
             return Ok(result);
         }
+
+        [HttpPost("restore-account")]
+        public async Task<ActionResult<AuthModel>> RestoreAccountAsync([FromBody] RequestTokenModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _authService.RestoreAccountAsync(model);
+
+            if (!result.IsAuthenticated)
+                return BadRequest(result.Message);
+
+            return Ok(result);
+        }
     }
 }
