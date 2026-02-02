@@ -68,3 +68,35 @@ package-lock.json
 # Rider
 .idea/
 
+/MedLink.Infrastructure/Migrations/20260129183829_AddDoctorAvailability.Designer.cs
+/MedLink.Infrastructure/Migrations/20260131084907_InialDb.cs
+/MedLink.Infrastructure/Migrations/20260129183829_AddDoctorAvailability.cs
+/MedLink.Infrastructure/Migrations/20260127183826_IntialCreate.cs
+/MedLink.Infrastructure/Migrations/20260127183826_IntialCreate.Designer.cs
+/MedLink.Infrastructure/Migrations/20260127184333_FixRelations.cs
+/MedLink.Infrastructure/Migrations/20260127184333_FixRelations.Designer.cs
+/MedLink.Infrastructure/Migrations/20260127191453_RefactoreEntties.cs
+/MedLink.Infrastructure/Migrations/20260127191453_RefactoreEntties.Designer.cs
+/MedLink.Infrastructure/Migrations/20260127192034_Remove_Notification.cs
+/MedLink.Infrastructure/Migrations/20260127192034_Remove_Notification.Designer.cs
+/MedLink.Infrastructure/Migrations/20260127192614_refactorePamentTable.cs
+/MedLink.Infrastructure/Migrations/20260127192614_refactorePamentTable.Designer.cs
+/MedLink.Infrastructure/Migrations/20260127200220_UpdateEntitiesAttributesAndAddFavoriteFixed.cs
+/MedLink.Infrastructure/Migrations/20260127200220_UpdateEntitiesAttributesAndAddFavoriteFixed.Designer.cs
+/MedLink.Infrastructure/Migrations/20260127200522_UpdateUserProfileRelation.cs
+/MedLink.Infrastructure/Migrations/20260127200522_UpdateUserProfileRelation.Designer.cs
+/MedLink.Infrastructure/Migrations/20260128161930_AddDoctorLocation.cs
+/MedLink.Infrastructure/Migrations/20260128161930_AddDoctorLocation.Designer.cs
+/MedLink.Infrastructure/Migrations/20260128172158_AddGenderColumn.cs
+/MedLink.Infrastructure/Migrations/20260128172158_AddGenderColumn.Designer.cs
+/MedLink.Infrastructure/Migrations/20260128195044_seedData.cs
+/MedLink.Infrastructure/Migrations/20260128221957_AddCitySpecialtyIndexToDoctor.Designer.cs
+/MedLink.Infrastructure/Migrations/20260128195044_seedData.Designer.cs
+/MedLink.Infrastructure/Migrations/20260128200859_RemoveUserIdFromDoctor.cs
+/MedLink.Infrastructure/Migrations/20260128200859_RemoveUserIdFromDoctor.Designer.cs
+/MedLink.Infrastructure/Migrations/20260128213552_SeedRoles.cs
+/MedLink.Infrastructure/Migrations/20260128213552_SeedRoles.Designer.cs
+/MedLink.Infrastructure/Migrations/20260128221957_AddCitySpecialtyIndexToDoctor.cs
+/MedLink.Infrastructure/Migrations/20260131084907_InialDb.Designer.cs
+/Medical Team B/Properties/launchSettings.json
+/Medical Team B/appsettings.json

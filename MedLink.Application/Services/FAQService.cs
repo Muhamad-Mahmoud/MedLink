@@ -60,9 +60,11 @@ namespace MedLink.Application.Services
             throw new NotImplementedException();
         }
 
-        public Task UpdateQuestionAsync(FAQ Faq)
+        public async Task UpdateQuestionAsync(FAQ Faq)
         {
-            throw new NotImplementedException();
+            var repo = _unitOfWork.Repository<FAQ>();
+            repo.Update(Faq);
+            await _unitOfWork.Complete();
         }
     }
 }

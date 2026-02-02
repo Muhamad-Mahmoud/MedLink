@@ -16,8 +16,8 @@ using System.Net.Mail;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using MedLink_Application.DTOs.Identity;
-using MedLink_Application.Interfaces.Services;
+using MedLink.Application.DTOs.Identity;
+using MedLink.Application.Interfaces.Services;
 
 namespace MedLink.Application.Services
 {
@@ -29,8 +29,9 @@ namespace MedLink.Application.Services
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
         private readonly ISmsService _smsService;
+        private readonly IProfileService _userProfileService;
 
-        public AuthService(UserManager<ApplicationUser> userManager, IOptions<Jwt> jwt, IMapper mapper, RoleManager<IdentityRole> roleManager, IEmailService emailService, ISmsService smsService)
+        public AuthService(UserManager<ApplicationUser> userManager, IOptions<Jwt> jwt,IProfileService userProfileService, IMapper mapper, RoleManager<IdentityRole> roleManager, IEmailService emailService, ISmsService smsService)
         {
             _userManager = userManager;
             _jwt = jwt.Value;
@@ -38,6 +39,7 @@ namespace MedLink.Application.Services
             _roleManager = roleManager;
             _emailService = emailService;
             _smsService = smsService;
+            _userProfileService = userProfileService;
         }
 
         // =================================================================================================
@@ -61,8 +63,17 @@ namespace MedLink.Application.Services
                 return new AuthModel { Message = errors };
             }
 
+            await _userProfileService.CreateAsync(
+                    user.Id,
+                    model.FullName ?? model.Email.Split('@')[0]
+             );
+
             await _userManager.AddToRoleAsync(user, "User");
 
+            await _userProfileService.CreateAsync(
+                    user.Id,
+                    model.FullName ?? model.Email.Split('@')[0]
+             );
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
             var callbackUrl = $"{_jwt.Issuer}/api/auth/confirm-email?userId={user.Id}&code={code}";
@@ -82,7 +93,7 @@ namespace MedLink.Application.Services
         public async Task<AuthModel> GetTokenAsync(RequestTokenModel model)
         {
             var authModel = new AuthModel();
-            var user =  await _userManager.FindByEmailAsync(model.Email);
+            var user = await _userManager.FindByEmailAsync(model.Email);
 
             if (user is null || !await _userManager.CheckPasswordAsync(user, model.Password))
             {
@@ -178,6 +189,7 @@ namespace MedLink.Application.Services
         // =================================================================================================
 
         public async Task<string> ChangePasswordAsync(ChangePasswordModel model)
+        public async Task<string> AddRoleAsync(AddRoleModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null) return "User not found";
@@ -230,6 +242,8 @@ namespace MedLink.Application.Services
                 authModel.Message = "Error restoring account";
                 return authModel;
             }
+        public async Task<bool> ForgotPasswordAsync(ForgotPasswordModel model)
+        {
 
             var token = await CreateJwtToken(user);
             authModel.Message = "Account restored and logged in successfully";
@@ -311,7 +325,7 @@ namespace MedLink.Application.Services
 
             if (!phoneNumber.StartsWith("+"))
                 phoneNumber = "+" + phoneNumber;
-            
+
             try
             {
                 var status = await _smsService.SendVerificationTokenAsync(phoneNumber);
@@ -353,6 +367,58 @@ namespace MedLink.Application.Services
         // =================================================================================================
 
         public async Task<string> AddRoleAsync(AddRoleModel model)
+        public async Task<AuthModel> LoginWithGoogleAsync(string email, string name, string googleId)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user != null && user.IsDeleted)
+                return new AuthModel { Message = "Account is deleted" };
+
+            if (user == null)
+            {
+                // Create user if not exists
+                user = new ApplicationUser
+                {
+                    UserName = email.Split('@')[0],
+                    Email = email,
+                    FullName = name,
+                    EmailConfirmed = true // Trusted source
+                };
+
+                var result = await _userManager.CreateAsync(user);
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    return new AuthModel { Message = errors };
+                }
+
+                await _userManager.AddToRoleAsync(user, "User");
+                await _userManager.AddLoginAsync(user, new UserLoginInfo("Google", googleId, "Google"));
+            }
+            else
+            {
+                // Ensure login is linked
+                var logins = await _userManager.GetLoginsAsync(user);
+                if (!logins.Any(l => l.LoginProvider == "Google" && l.ProviderKey == googleId))
+                {
+                    await _userManager.AddLoginAsync(user, new UserLoginInfo("Google", googleId, "Google"));
+                }
+            }
+
+            var token = await CreateJwtToken(user);
+
+            return new AuthModel
+            {
+                Message = "Login successful",
+                IsAuthenticated = true,
+                Token = new JwtSecurityTokenHandler().WriteToken(token),
+                Email = user.Email,
+                Username = user.UserName,
+                Roles = (await _userManager.GetRolesAsync(user)).ToList(),
+                ExpiresOn = token.ValidTo
+            };
+        }
+        public async Task<string> ConfirmEmailAsync(string userId, string code)
         {
             var user = await _userManager.FindByIdAsync(model.UserId);
 

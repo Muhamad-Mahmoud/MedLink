@@ -1,11 +1,11 @@
 ﻿using MailKit.Net.Smtp;
-using MedLink_Application.Common.Email;
-using MedLink_Application.DTOs.Identity;
-using MedLink_Application.Interfaces.Services;
+using MedLink.Application.Common.Email;
+using MedLink.Application.DTOs.Identity;
+using MedLink.Application.Interfaces.Services;
 using MimeKit;
 
 
-namespace MedLink_Application.Services
+namespace MedLink.Application.Services
 {
     public class EmailService : IEmailService
     {

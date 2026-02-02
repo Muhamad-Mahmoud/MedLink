@@ -1,7 +1,5 @@
 using MedLink.Application.DTOs.Doctors;
-using MedLink.Application.DTOs.Doctors;
 using MedLink.Application.Interfaces.Services;
-using MedLink.Application.Services;
 using MedLink.Application.Specifications;
 using MedLink.Domain.Entities.Medical;
 using Microsoft.AspNetCore.Mvc;
@@ -49,7 +47,7 @@ namespace Medical_Team_B.Controllers
 
       
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, Doctor doctor)
+        public async Task<IActionResult> Update(int id, [FromBody] Doctor doctor)
         {
             if (id != doctor.Id)
                 return BadRequest("ID mismatch");
