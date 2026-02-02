@@ -42,6 +42,9 @@ namespace MedLink.Application.Services
             _userProfileService = userProfileService;
         }
 
+        // =================================================================================================
+        // 1. Authentication & Registration
+        // =================================================================================================
 
         public async Task<AuthModel> RegisterAsync(RegisterModel model)
         {
@@ -49,7 +52,7 @@ namespace MedLink.Application.Services
             var existingUser = await _userManager.FindByEmailAsync(model.Email);
 
             if (existingUser is not null)
-                return new AuthModel { Message = "User already registered" };
+                return new AuthModel { Message = "Email already registered" };
 
             var user = _mapper.Map<ApplicationUser>(model);
             var result = await _userManager.CreateAsync(user, model.Password);
@@ -122,38 +125,150 @@ namespace MedLink.Application.Services
             return authModel;
         }
 
-
-        public async Task<string> AddRoleAsync(AddRoleModel model)
+        public async Task<AuthModel> LoginWithGoogleAsync(string email, string name, string googleId)
         {
-            var user = await _userManager.FindByIdAsync(model.UserId);
+            var user = await _userManager.FindByEmailAsync(email);
 
-            if (user is null || !await _roleManager.RoleExistsAsync(model.Role))
-                return "Invalid User ID or Role";
+            if (user != null && user.IsDeleted)
+                return new AuthModel { Message = "Account is deleted" };
 
-            if (await _userManager.IsInRoleAsync(user, model.Role))
-                return "User already assigned to this role";
+            if (user == null)
+            {
+                var baseUserName = email.Split('@')[0];
+                var userName = baseUserName;
+                while (await _userManager.FindByNameAsync(userName) != null)
+                {
+                    userName = $"{baseUserName}{Random.Shared.Next(1000, 9999)}";
+                }
 
-            var result = await _userManager.AddToRoleAsync(user, model.Role);
+                // Create user if not exists
+                user = new ApplicationUser
+                {
+                    UserName = userName,
+                    Email = email,
+                    FullName = name,
+                    EmailConfirmed = true // Trusted source
+                };
 
-            return result.Succeeded ? string.Empty : "Something went wrong";
+                var result = await _userManager.CreateAsync(user);
+                if (!result.Succeeded)
+                {
+                     var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                     return new AuthModel { Message = errors };
+                }
 
+                await _userManager.AddToRoleAsync(user, "User");
+                await _userManager.AddLoginAsync(user, new UserLoginInfo("Google", googleId, "Google"));
+            }
+            else
+            {
+                 // Ensure login is linked
+                 var logins = await _userManager.GetLoginsAsync(user);
+                 if (!logins.Any(l => l.LoginProvider == "Google" && l.ProviderKey == googleId))
+                 {
+                     await _userManager.AddLoginAsync(user, new UserLoginInfo("Google", googleId, "Google"));
+                 }
+            }
+
+            var token = await CreateJwtToken(user);
+
+            return new AuthModel
+            {
+                Message = "Login successful",
+                IsAuthenticated = true,
+                Token = new JwtSecurityTokenHandler().WriteToken(token),
+                Email = user.Email,
+                Username = user.UserName,
+                Roles = (await _userManager.GetRolesAsync(user)).ToList(),
+                ExpiresOn = token.ValidTo
+            };
         }
 
+        // =================================================================================================
+        // 2. Account Management
+        // =================================================================================================
 
+        public async Task<string> ChangePasswordAsync(ChangePasswordModel model)
+        public async Task<string> AddRoleAsync(AddRoleModel model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null) return "User not found";
 
+            if (user.IsDeleted) return "Account is deleted";
 
+            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+
+            if (!result.Succeeded)
+            {
+                return string.Join(", ", result.Errors.Select(e => e.Description));
+            }
+
+            return "Password changed successfully";
+        }
+
+        public async Task<string> DeleteAccountAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return "User not found";
+
+            user.IsDeleted = true;
+            var result = await _userManager.UpdateAsync(user);
+
+            return result.Succeeded ? "Account deleted successfully" : "Error deleting account";
+        }
+
+        public async Task<AuthModel> RestoreAccountAsync(RequestTokenModel model)
+        {
+            var authModel = new AuthModel();
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if (user is null || !await _userManager.CheckPasswordAsync(user, model.Password))
+            {
+                authModel.Message = "Email or Password is incorrect!";
+                return authModel;
+            }
+
+            if (!user.IsDeleted)
+            {
+                authModel.Message = "Account is not deleted";
+                return authModel;
+            }
+
+            user.IsDeleted = false;
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                authModel.Message = "Error restoring account";
+                return authModel;
+            }
         public async Task<bool> ForgotPasswordAsync(ForgotPasswordModel model)
         {
 
+            var token = await CreateJwtToken(user);
+            authModel.Message = "Account restored and logged in successfully";
+            authModel.IsAuthenticated = true;
+            authModel.Email = user.Email;
+            authModel.Username = user.UserName;
+            authModel.Roles = (await _userManager.GetRolesAsync(user)).ToList();
+            authModel.ExpiresOn = token.ValidTo;
+            authModel.Token = new JwtSecurityTokenHandler().WriteToken(token);
 
+            return authModel;
+        }
+
+        // =================================================================================================
+        // 3. Password Recovery
+        // =================================================================================================
+
+        public async Task<bool> ForgotPasswordAsync(ForgotPasswordModel model)
+        {
             var user = await _userManager.FindByEmailAsync(model.Email!);
 
             if (user is null)
                 return false;
 
-
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-
 
             var param = new Dictionary<string, string?>
             {
@@ -161,18 +276,13 @@ namespace MedLink.Application.Services
                 {"email",model.Email }
             };
 
-
             var callback = QueryHelpers.AddQueryString(model.ClientUri, param);
 
             var message = new EmailMessage([user.Email], "Reset Your Password", callback);
             await _emailService.SendEmailAsync(message);
 
             return true;
-
         }
-
-
-
 
         public async Task<ResetPasswordResult> ResetPasswordAsync(ResetPasswordModel model)
         {
@@ -180,7 +290,6 @@ namespace MedLink.Application.Services
 
             if (user is null)
                 return new ResetPasswordResult(false, "user not found Request");
-
 
             var result = await _userManager.ResetPasswordAsync(user, model.Token!, model.Password!);
 
@@ -192,68 +301,22 @@ namespace MedLink.Application.Services
             }
 
             return new ResetPasswordResult(true, "Password Changed Successfully");
-
         }
 
+        // =================================================================================================
+        // 4. Verification (Email & Phone)
+        // =================================================================================================
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        private async Task<JwtSecurityToken> CreateJwtToken(ApplicationUser user)
+        public async Task<string> ConfirmEmailAsync(string userId, string code)
         {
-            var userClaims = await _userManager.GetClaimsAsync(user);
-            var roles = await _userManager.GetRolesAsync(user);
-            var roleClaims = new List<Claim>();
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return "User not found";
 
-            foreach (var role in roles)
-            {
-                roleClaims.Add(new Claim("roles", role));
-            }
+            code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+            var result = await _userManager.ConfirmEmailAsync(user, code);
 
-            var claims = new List<Claim>
-            {
-                new Claim(JwtRegisteredClaimNames.Sub,user.UserName),
-                new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
-                new Claim("uid",user.Id)
-            };
-
-            if (!string.IsNullOrWhiteSpace(user.Email))
-                claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email));
-
-            if (!string.IsNullOrWhiteSpace(user.PhoneNumber))
-                claims.Add(new Claim("phone_number", user.PhoneNumber));
-
-            claims.AddRange(userClaims);
-            claims.AddRange(roleClaims);
-
-
-            var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
-            var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
-
-            var jwtSecurityToken = new JwtSecurityToken(
-                issuer: _jwt.Issuer,
-                audience: _jwt.Audience,
-                claims: claims,
-                expires: DateTime.Now.AddDays(Convert.ToDouble(_jwt.DurationInDays)),
-                signingCredentials: signingCredentials
-            );
-
-            return jwtSecurityToken;
+            return result.Succeeded ? "Email confirmed successfully" : "Error confirming email";
         }
-
 
         public async Task<string> SendPhoneVerificationAsync(string email, string phoneNumber)
         {
@@ -299,6 +362,11 @@ namespace MedLink.Application.Services
             }
         }
 
+        // =================================================================================================
+        // 5. Administration
+        // =================================================================================================
+
+        public async Task<string> AddRoleAsync(AddRoleModel model)
         public async Task<AuthModel> LoginWithGoogleAsync(string email, string name, string googleId)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -352,62 +420,63 @@ namespace MedLink.Application.Services
         }
         public async Task<string> ConfirmEmailAsync(string userId, string code)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null) return "User not found";
+            var user = await _userManager.FindByIdAsync(model.UserId);
 
-            code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
-            var result = await _userManager.ConfirmEmailAsync(user, code);
+            if (user is null || !await _roleManager.RoleExistsAsync(model.Role))
+                return "Invalid User ID or Role";
 
-            return result.Succeeded ? "Email confirmed successfully" : "Error confirming email";
+            if (await _userManager.IsInRoleAsync(user, model.Role))
+                return "User already assigned to this role";
+
+            var result = await _userManager.AddToRoleAsync(user, model.Role);
+
+            return result.Succeeded ? string.Empty : "Something went wrong";
         }
 
-        public async Task<string> DeleteAccountAsync(string userId)
+        // =================================================================================================
+        // 6. Private Helpers
+        // =================================================================================================
+
+        private async Task<JwtSecurityToken> CreateJwtToken(ApplicationUser user)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null) return "User not found";
+            var userClaims = await _userManager.GetClaimsAsync(user);
+            var roles = await _userManager.GetRolesAsync(user);
+            var roleClaims = new List<Claim>();
 
-            user.IsDeleted = true;
-            var result = await _userManager.UpdateAsync(user);
-
-            return result.Succeeded ? "Account deleted successfully" : "Error deleting account";
-        }
-
-        public async Task<AuthModel> RestoreAccountAsync(RequestTokenModel model)
-        {
-            var authModel = new AuthModel();
-            var user = await _userManager.FindByEmailAsync(model.Email);
-
-            if (user is null || !await _userManager.CheckPasswordAsync(user, model.Password))
+            foreach (var role in roles)
             {
-                authModel.Message = "Email or Password is incorrect!";
-                return authModel;
+                roleClaims.Add(new Claim("roles", role));
             }
 
-            if (!user.IsDeleted)
+            var claims = new List<Claim>
             {
-                authModel.Message = "Account is not deleted";
-                return authModel;
-            }
+                new Claim(JwtRegisteredClaimNames.Sub,user.UserName),
+                new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
+                new Claim("uid",user.Id)
+            };
 
-            user.IsDeleted = false;
-            var result = await _userManager.UpdateAsync(user);
+            if (!string.IsNullOrWhiteSpace(user.Email))
+                claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email));
 
-            if (!result.Succeeded)
-            {
-                authModel.Message = "Error restoring account";
-                return authModel;
-            }
+            if (!string.IsNullOrWhiteSpace(user.PhoneNumber))
+                claims.Add(new Claim("phone_number", user.PhoneNumber));
 
-            var token = await CreateJwtToken(user);
-            authModel.Message = "Account restored and logged in successfully";
-            authModel.IsAuthenticated = true;
-            authModel.Email = user.Email;
-            authModel.Username = user.UserName;
-            authModel.Roles = (await _userManager.GetRolesAsync(user)).ToList();
-            authModel.ExpiresOn = token.ValidTo;
-            authModel.Token = new JwtSecurityTokenHandler().WriteToken(token);
+            claims.AddRange(userClaims);
+            claims.AddRange(roleClaims);
 
-            return authModel;
+
+            var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
+            var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
+
+            var jwtSecurityToken = new JwtSecurityToken(
+                issuer: _jwt.Issuer,
+                audience: _jwt.Audience,
+                claims: claims,
+                expires: DateTime.Now.AddDays(Convert.ToDouble(_jwt.DurationInDays)),
+                signingCredentials: signingCredentials
+            );
+
+            return jwtSecurityToken;
         }
     }
 }
