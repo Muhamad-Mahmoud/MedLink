@@ -1,4 +1,5 @@
 using Medical_Team_B.Extensions;
+using MedLink.Domain.Identity;
 using Medical_Team_B.Middlewares;
 using MedLink.Application.Mapping;
 using MedLink.Domain.Identity;
@@ -22,7 +23,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddAutoMapper(typeof(AppointmentProfile).Assembly);
-builder.Services.AddAutoMapper(typeof(AuthMappingProfiles)); // ãåã ÊÓÌá Profile åäÇ
+builder.Services.AddAutoMapper(typeof(AuthMappingProfiles)); // ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Profile ï¿½ï¿½ï¿½
 
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(
@@ -31,6 +32,7 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplicationServices();
+
 builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 builder.Services.AddScoped<IDoctorAvailabilityRepository, DoctorAvailabilityRepository>();

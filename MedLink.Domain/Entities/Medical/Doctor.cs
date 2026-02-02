@@ -11,7 +11,7 @@ public class Doctor : BaseEntity
     public string Name { get; set; } = string.Empty;
 
     public int SpecialtyId { get; set; }
-    public Specialization Specialization { get; set; } = null!;
+    public Specialization? Specialization { get; set; } = null!;
 
     public string? Bio { get; set; }
     public string? ImageUrl { get; set; }
@@ -20,6 +20,7 @@ public class Doctor : BaseEntity
 
     public string City { get; set; } = string.Empty;
     public Gender Gender { get; set; }
+    public bool IsDeleted { get; set; }= false;
     
     /// Geographic location of doctor's clinic (SRID 4326 = WGS84)
     public Point Location { get; set; } = null!;
