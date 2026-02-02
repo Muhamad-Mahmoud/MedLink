@@ -16,6 +16,9 @@ namespace MedLink.Application.Mapping
             CreateMap<RegisterModel, ApplicationUser>()
              .ForMember(d => d.UserName, o => o.MapFrom<EmailToUsernameResolver>())
              .ForMember(d => d.Email, o => o.MapFrom(s => s.Email.Contains("@") ? s.Email : null));
+
+
         }
+
     }
 }

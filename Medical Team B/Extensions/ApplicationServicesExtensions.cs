@@ -1,6 +1,8 @@
 using MedLink.Application.Interfaces.Services;
 using MedLink.Application.Mapping;
 using MedLink.Application.Services;
+using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 using MedLink.Infrastructure.Services;
 using MedLink.Application.Interfaces.Services;
 using MedLink.Application.Services;
@@ -30,7 +32,12 @@ namespace Medical_Team_B.Extensions
        options.JsonSerializerOptions.Converters.Add(new NetTopologySuite.IO.Converters.GeoJsonConverterFactory());
     });
 
-            services.AddAutoMapper(typeof(MappingProfile));
+            services.AddAutoMapper(cfg =>
+            {
+                cfg.AddProfile<MappingProfile>();
+            });
+            //  services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
 
             return services;
         }

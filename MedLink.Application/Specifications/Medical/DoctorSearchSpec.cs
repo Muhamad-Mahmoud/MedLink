@@ -46,13 +46,13 @@ namespace MedLink.Application.Specifications.Medical
             Point? searchPoint = null;
             double radiusMeters = 0;
             double minLat = 0, maxLat = 0, minLng = 0, maxLng = 0;
-            
+
             if (hasLocation)
             {
                 var radiusKm = Math.Max(p.RadiusInKm, MinRadiusKm);
                 radiusMeters = radiusKm * MetersPerKilometer;
                 searchPoint = CreatePoint(p.Longitude!.Value, p.Latitude!.Value);
-                
+
                 var radiusDeg = radiusKm / KilometersPerDegree;
                 minLat = p.Latitude!.Value - radiusDeg;
                 maxLat = p.Latitude.Value + radiusDeg;
@@ -60,15 +60,15 @@ namespace MedLink.Application.Specifications.Medical
                 maxLng = p.Longitude.Value + radiusDeg;
             }
 
-            var filterByAvailability = p.AvailableOnDate;
+            var filterByAvailability = p.AvailableOnDate; // This line is ambiguous due to duplicate property definitions.
             var searchDateStart = p.SearchDate.Date;
             var searchDateEnd = searchDateStart.AddDays(1);
 
             return d =>
                 // Location filter: City > Coordinates > None
-                (hasCity 
+                (hasCity
                     ? (d.City != null && d.City == city)
-                    : hasLocation 
+                    : hasLocation
                         ? (d.Location != null &&
                            d.Location.Y >= minLat && d.Location.Y <= maxLat &&
                            d.Location.X >= minLng && d.Location.X <= maxLng &&
@@ -78,7 +78,7 @@ namespace MedLink.Application.Specifications.Medical
                 // Keyword in name or specialty
                 && (!hasKeyword || (
                     (d.Name != null && d.Name.Contains(keyword!)) ||
-                    (d.Specialization != null && d.Specialization.Name != null && 
+                    (d.Specialization != null && d.Specialization.Name != null &&
                      d.Specialization.Name.Contains(keyword!))))
 
                 // Filters

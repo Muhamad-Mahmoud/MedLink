@@ -55,6 +55,8 @@ namespace MedLink.Application.Services
                 return new AuthModel { Message = "Email already registered" };
 
             var user = _mapper.Map<ApplicationUser>(model);
+
+
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (!result.Succeeded)
