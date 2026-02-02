@@ -64,7 +64,7 @@ namespace MedLink.Application.Services
 
             if (doctor != null)
             {
-                repo.Delete(doctor);
+               doctor.IsDeleted= true;
                 await _unitOfWork.Complete();
             }
             else
@@ -89,6 +89,11 @@ namespace MedLink.Application.Services
                 : await repo.GetAllAsync();
         }
 
+       
+       
+        
+          
+        
     }
     }
 

@@ -23,6 +23,8 @@ namespace Medical_Team_B.Extensions
             services.AddSingleton<ILanguageService, LanguageService>();
             services.AddScoped<IDoctorService, DoctorService>();
             services.AddScoped<IFAQ,FAQService>();
+            services.AddScoped<ILanguageService, LanguageService>();
+            services.AddScoped<IAboutService, AboutService>();
             services.AddControllers()
     .AddJsonOptions(options => {
        options.JsonSerializerOptions.Converters.Add(new NetTopologySuite.IO.Converters.GeoJsonConverterFactory());
