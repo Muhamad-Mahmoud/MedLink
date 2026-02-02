@@ -1,5 +1,5 @@
 using MedLink.Application.Interfaces.Specifications;
-using MedLink.Domain.Entities.Content;
+using System.Linq.Expressions;
 
 namespace MedLink.Application.Interfaces.Persistence
 {
@@ -13,6 +13,6 @@ namespace MedLink.Application.Interfaces.Persistence
         Task AddAsync(T entity);
         void Update(T entity);
         void Delete(T entity);
-       
+        Task<T?> FindAsync(Expression<Func<T, bool>> predicate);
     }
 }

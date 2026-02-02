@@ -5,25 +5,25 @@
 namespace MedLink.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddGenderColumn : Migration
+    public partial class AddPreferredLanguageToUserProfile : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "Gender",
-                table: "Doctors",
-                type: "int",
+            migrationBuilder.AddColumn<string>(
+                name: "PreferredLanguage",
+                table: "UserProfiles",
+                type: "nvarchar(max)",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: "");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Gender",
-                table: "Doctors");
+                name: "PreferredLanguage",
+                table: "UserProfiles");
         }
     }
 }

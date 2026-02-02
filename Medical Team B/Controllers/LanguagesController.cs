@@ -10,6 +10,12 @@ namespace Medical_Team_B.Controllers
     public class LanguagesController : ControllerBase
     {
         private readonly ILanguageService _languageService;
+    [ApiController]
+    [Route("api/languages")]
+    public class LanguagesController : ControllerBase
+    {
+        private readonly ILanguageService _languageService;
+
         public LanguagesController(ILanguageService languageService)
         {
             _languageService = languageService;
@@ -59,4 +65,12 @@ namespace Medical_Team_B.Controllers
             return NoContent();
         }
     }
+
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            return Ok(_languageService.GetAllLanguages());
+        }
+    }
+
 }
