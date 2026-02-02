@@ -5,14 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Medical_Team_B.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class LanguagesController : ControllerBase
-    {
-        private readonly ILanguageService _languageService;
-    [ApiController]
-    [Route("api/languages")]
-    public class LanguagesController : ControllerBase
+    public class LanguagesController : BaseApiController
     {
         private readonly ILanguageService _languageService;
 
@@ -64,13 +57,9 @@ namespace Medical_Team_B.Controllers
             await _languageService.DeleteLanguageAsync(id);
             return NoContent();
         }
-    }
+    
 
-        [HttpGet]
-        public IActionResult GetAll()
-        {
-            return Ok(_languageService.GetAllLanguages());
-        }
+        
     }
 
 }

@@ -58,7 +58,7 @@ namespace MedLink.Application.Services
             repo.Update(language);
             await _unitOfWork.Complete();
         }
-    }
+    
         private static readonly List<LanguageDto> Languages = new()
     {
         new() { Code = "en", Name = "English" },

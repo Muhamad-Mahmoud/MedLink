@@ -14,7 +14,7 @@ namespace MedLink.Application.Specifications
     {
         public UpcomingAppointmentsByUserSpec(string userId)
             : base(a =>
-                a.UserId == userId &&
+                a.BookedByUserId == userId &&
                 a.Status != AppointmentStatus.Cancelled &&
                 (
                     a.Schedule.Date > DateTime.UtcNow.Date ||

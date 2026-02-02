@@ -8,7 +8,7 @@ namespace MedLink.Application.Specifications
     {
         public PastAppointmentsByUserSpec(string userId)
             : base(a =>
-                a.UserId == userId &&
+                a.BookedByUserId == userId &&
                 a.Status != AppointmentStatus.Cancelled &&
                 (
                     a.Schedule.Date < DateTime.UtcNow.Date ||
