@@ -32,7 +32,7 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         builder.HasOne(p => p.Appointment)
         .WithOne(a => a.Payment)
         .HasForeignKey<Payment>(p => p.AppointmentId)
-        .OnDelete(DeleteBehavior.Restrict);
+        .OnDelete(DeleteBehavior.Cascade);
 
     }
 }

@@ -6,11 +6,6 @@ using MedLink.Domain.Interfaces.Repositories;
 using MedLink_Application.Commands;
 using MedLink_Application.Interfaces.Repositories;
 using MedLink_Application.Responses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MedLink_Application.Handlers.Commands
 {
@@ -36,7 +31,6 @@ namespace MedLink_Application.Handlers.Commands
 
         public async Task<PaymentDto> Handle(CreatePaymentCommand request, CancellationToken cancellationToken)
         {
-           
             var appointment = await _appointmentRepository.GetByIdAsync(request.AppointmentId);
             if (appointment == null)
                 throw new KeyNotFoundException($"Appointment with ID {request.AppointmentId} not found");
@@ -50,17 +44,16 @@ namespace MedLink_Application.Handlers.Commands
 
             var (paymentIntentId, clientSecret) = await _stripeService.CreatePaymentIntentAsync(
                 amount: appointment.Fee,
-                currency: "egp",
+                currency: "EGP",
                 customerEmail: request.CustomerEmail ?? appointment.PatientEmail ?? "",
                 metadata: new Dictionary<string, string>
                 {
-                { "appointment_id", appointment.Id.ToString() },
-                { "patient_name", appointment.PatientName },
-                { "doctor_id", appointment.DoctorId.ToString() }
+            { "appointment_id", appointment.Id.ToString() },
+            { "patient_name", appointment.PatientName },
+            { "doctor_id", appointment.DoctorId.ToString() }
                 }
             );
 
-            
             var payment = new Payment
             {
                 AppointmentId = request.AppointmentId,
@@ -70,14 +63,19 @@ namespace MedLink_Application.Handlers.Commands
                 Status = PaymentStatus.Pending,
                 StripePaymentIntentId = paymentIntentId,
                 StripeClientSecret = clientSecret,
-                CreatedAt = DateTime.UtcNow
+                FailureReason = "",
+                RefundReason = "",
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                RefundedAt = DateTime.MinValue, // أو null لو العمود يسمح
+                IsDeleted = false,
+                PaidAt = null
             };
 
-         
             var savedPayment = await _paymentRepository.AddAsync(payment);
 
-         
             return _mapper.Map<PaymentDto>(savedPayment);
         }
+
     }
 }

@@ -1,7 +1,9 @@
 using MedLink.Domain.Entities.Appointments;
 using MedLink.Domain.Entities.Medical;
 using MedLink.Domain.Enums;
+using MedLink.Domain.Identity;
 using MedLink.Infrastructure.Persistence.Context;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
 
@@ -12,8 +14,38 @@ namespace MedLink.Infrastructure.Persistence.Seed
         // SRID 4326 = WGS84 (standard GPS coordinate system)
         private const int Srid = 4326;
 
-        public static async Task SeedAsync(ApplicationDbContext context)
+        public static async Task SeedAsync(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
+            // Seed Roles
+            var adminRoleId = "d11126cb-d069-4e04-a165-d4cf495d513d";
+            if (!await roleManager.RoleExistsAsync("Admin"))
+            {
+                var role = new IdentityRole("Admin")
+                {
+                    Id = adminRoleId
+                };
+                await roleManager.CreateAsync(role);
+            }
+
+            // Seed Admin User
+            var adminEmail = "admin@medlink.com";
+            if (await userManager.FindByEmailAsync(adminEmail) == null)
+            {
+                var adminUser = new ApplicationUser
+                {
+                    UserName = adminEmail,
+                    Email = adminEmail,
+                    FullName = "System Admin",
+                    EmailConfirmed = true
+                };
+
+                var result = await userManager.CreateAsync(adminUser, "Admin@123");
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(adminUser, "Admin");
+                }
+            }
+
             // Seed Specializations
             if (!await context.Specializations.AnyAsync())
             {
@@ -98,7 +130,7 @@ namespace MedLink.Infrastructure.Persistence.Seed
                         Price = 450,
                         Location = CreatePoint(31.3283, 30.0875), // Heliopolis, Cairo
                         Gender = Gender.Female,
-                         ImageUrl = "https://randomuser.me/api/portraits/women/65.jpg",
+                        ImageUrl = "https://randomuser.me/api/portraits/women/65.jpg",
                         Address = "99 Merghany St, Heliopolis, Cairo",
                         Availabilities = new List<DoctorAvailability>
                         {
@@ -118,4 +150,3 @@ namespace MedLink.Infrastructure.Persistence.Seed
         }
     }
 }
-

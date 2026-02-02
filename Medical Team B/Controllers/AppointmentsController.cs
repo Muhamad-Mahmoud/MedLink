@@ -11,8 +11,8 @@ using System.Threading.Tasks;
 
 namespace Medical_Team_B.Controllers
 {
-    //  [Authorize]
-    [AllowAnonymous]
+     [Authorize]
+    //[AllowAnonymous]
     public class AppointmentsController : BaseApiController
     {
         private readonly IMediator _mediator;
@@ -44,7 +44,7 @@ namespace Medical_Team_B.Controllers
         [HttpPost]
         public async Task<ActionResult<AppointmentDto>> CreateAppointment([FromBody] CreateAppointmentCommand command)
         {
-            var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+            var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("uid")?.Value;
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized("User not authenticated");
 
@@ -82,7 +82,7 @@ namespace Medical_Team_B.Controllers
         {
             try
             {
-                var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+                var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("uid")?.Value;
                 if (string.IsNullOrEmpty(userId))
                     return Unauthorized("User not authenticated");
 
@@ -135,7 +135,7 @@ namespace Medical_Team_B.Controllers
         [HttpGet("my-appointments")]
         public async Task<ActionResult<List<AppointmentDto>>> GetMyAppointments()
         {
-            var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+            var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("uid")?.Value;
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized("User not authenticated");
 
@@ -150,7 +150,7 @@ namespace Medical_Team_B.Controllers
         [HttpGet("upcoming")]
         public async Task<ActionResult<List<AppointmentDto>>> GetUpcomingAppointments()
         {
-            var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+            var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("uid")?.Value;
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized("User not authenticated");
 
@@ -170,7 +170,7 @@ namespace Medical_Team_B.Controllers
         {
             try
             {
-                var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+                var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("uid")?.Value;
                 if (string.IsNullOrEmpty(userId))
                     return Unauthorized("User not authenticated");
 
@@ -205,7 +205,7 @@ namespace Medical_Team_B.Controllers
         {
             try
             {
-                var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+                var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("uid")?.Value;
                 if (string.IsNullOrEmpty(userId))
                     return Unauthorized("User not authenticated");
 
@@ -240,7 +240,7 @@ namespace Medical_Team_B.Controllers
         {
             try
             {
-                var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+                var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("uid")?.Value;
                 if (string.IsNullOrEmpty(userId))
                     return Unauthorized("User not authenticated");
 
