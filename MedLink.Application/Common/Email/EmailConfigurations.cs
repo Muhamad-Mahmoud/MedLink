@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MedLink_Application.Common.Email
+namespace MedLink.Application.Common.Email
 {
     public class EmailConfigurations
     {

@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using MedLink_Application.Interfaces.Services;
+using MedLink.Application.Interfaces.Services;
 
 namespace Medical_Team_B.Extensions
 {
