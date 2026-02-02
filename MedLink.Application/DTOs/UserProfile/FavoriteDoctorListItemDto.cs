@@ -1,4 +1,4 @@
-﻿namespace MedLink_Application.DTOs.Favorites;
+﻿namespace MedLink.Application.DTOs.Favorites;
 
 public class FavoriteDoctorListItemDto
 {

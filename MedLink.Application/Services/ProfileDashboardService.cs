@@ -2,10 +2,10 @@
 using MedLink.Domain.Entities.User;
 using MedLink.Domain.Enums;
 using MedLink.Domain.Identity;
-using MedLink_Application.DTOs.UserProfile;
-using MedLink_Application.Interfaces.Persistence;
-using MedLink_Application.Interfaces.Services;
-using MedLink_Application.Specifications;
+using MedLink.Application.DTOs.UserProfile;
+using MedLink.Application.Interfaces.Persistence;
+using MedLink.Application.Interfaces.Services;
+using MedLink.Application.Specifications;
 using Microsoft.AspNetCore.Identity;
 
 public class ProfileDashboardService : IProfileDashboardService

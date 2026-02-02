@@ -1,11 +1,12 @@
-﻿using MedLink_Application.DTOs.UserProfile;
+﻿using MedLink.Application.DTOs.UserProfile;
+using MedLink.Application.DTOs.UserProfile;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MedLink_Application.Interfaces.Services
+namespace MedLink.Application.Interfaces.Services
 {
     public interface IProfileDashboardService
     {

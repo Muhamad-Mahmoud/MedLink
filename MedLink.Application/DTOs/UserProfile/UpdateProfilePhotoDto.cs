@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
-namespace MedLink_Application.DTOs.UserProfile
+namespace MedLink.Application.DTOs.UserProfile
 {
     public class UpdateProfilePhotoDto
     {

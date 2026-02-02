@@ -1,7 +1,8 @@
-﻿using MedLink.Infrastructure.Services;
-using MedLink_Application.DTOs.UserProfile;
-using MedLink_Application.Interfaces.Services;
-using MedLink_Application.Services;
+﻿using MedLink.Application.Interfaces.Services;
+using MedLink.Infrastructure.Services;
+using MedLink.Application.DTOs.UserProfile;
+using MedLink.Application.Interfaces.Services;
+using MedLink.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;

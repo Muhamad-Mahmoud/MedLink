@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MedLink_Application.Specifications
+namespace MedLink.Application.Specifications
 {
     public class UpcomingAppointmentsSpec : BaseSpecification<Appointment>
     {

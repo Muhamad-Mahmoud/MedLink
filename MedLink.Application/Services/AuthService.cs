@@ -1,22 +1,23 @@
 using AutoMapper;
 using MedLink.Domain.Identity;
-using MedLink_Application.Common.JWT;
-using MedLink_Application.DTOs.Identity;
-using MedLink_Application.Interfaces.Services;
+using MedLink.Application.Common.JWT;
+using MedLink.Application.DTOs.Identity;
+using MedLink.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Text;
-using MedLink_Application.DTOs.Identity;
-using MedLink_Application.Interfaces.Services;
-using MedLink_Application.Common.JWT;
-using NETCore.MailKit.Core;
-using MedLink.Domain.Identity;
+using System.Threading.Tasks;
+using MedLink.Application.DTOs.Identity;
+using MedLink.Application.Interfaces.Services;
 
 namespace MedLink.Application.Services
 {
@@ -28,8 +29,9 @@ namespace MedLink.Application.Services
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
         private readonly ISmsService _smsService;
+        private readonly IProfileService _userProfileService;
 
-        public AuthService(UserManager<ApplicationUser> userManager, IOptions<Jwt> jwt, IMapper mapper, RoleManager<IdentityRole> roleManager, IEmailService emailService, ISmsService smsService)
+        public AuthService(UserManager<ApplicationUser> userManager, IOptions<Jwt> jwt,IProfileService userProfileService, IMapper mapper, RoleManager<IdentityRole> roleManager, IEmailService emailService, ISmsService smsService)
         {
             _userManager = userManager;
             _jwt = jwt.Value;
@@ -37,6 +39,7 @@ namespace MedLink.Application.Services
             _roleManager = roleManager;
             _emailService = emailService;
             _smsService = smsService;
+            _userProfileService = userProfileService;
         }
 
 
@@ -57,8 +60,17 @@ namespace MedLink.Application.Services
                 return new AuthModel { Message = errors };
             }
 
+            await _userProfileService.CreateAsync(
+                    user.Id,
+                    model.FullName ?? model.Email.Split('@')[0]
+             );
+
             await _userManager.AddToRoleAsync(user, "User");
 
+            await _userProfileService.CreateAsync(
+                    user.Id,
+                    model.FullName ?? model.Email.Split('@')[0]
+             );
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
             var callbackUrl = $"{_jwt.Issuer}/api/auth/confirm-email?userId={user.Id}&code={code}";
@@ -78,7 +90,7 @@ namespace MedLink.Application.Services
         public async Task<AuthModel> GetTokenAsync(RequestTokenModel model)
         {
             var authModel = new AuthModel();
-            var user =  await _userManager.FindByEmailAsync(model.Email);
+            var user = await _userManager.FindByEmailAsync(model.Email);
 
             if (user is null || !await _userManager.CheckPasswordAsync(user, model.Password))
             {
@@ -111,8 +123,6 @@ namespace MedLink.Application.Services
         }
 
 
-
-
         public async Task<string> AddRoleAsync(AddRoleModel model)
         {
             var user = await _userManager.FindByIdAsync(model.UserId);
@@ -132,7 +142,6 @@ namespace MedLink.Application.Services
 
 
 
-
         public async Task<bool> ForgotPasswordAsync(ForgotPasswordModel model)
         {
 
@@ -142,7 +151,6 @@ namespace MedLink.Application.Services
             if (user is null)
                 return false;
 
-        }
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
@@ -254,7 +262,7 @@ namespace MedLink.Application.Services
 
             if (!phoneNumber.StartsWith("+"))
                 phoneNumber = "+" + phoneNumber;
-            
+
             try
             {
                 var status = await _smsService.SendVerificationTokenAsync(phoneNumber);
@@ -312,8 +320,8 @@ namespace MedLink.Application.Services
                 var result = await _userManager.CreateAsync(user);
                 if (!result.Succeeded)
                 {
-                     var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                     return new AuthModel { Message = errors };
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    return new AuthModel { Message = errors };
                 }
 
                 await _userManager.AddToRoleAsync(user, "User");
@@ -321,12 +329,12 @@ namespace MedLink.Application.Services
             }
             else
             {
-                 // Ensure login is linked
-                 var logins = await _userManager.GetLoginsAsync(user);
-                 if (!logins.Any(l => l.LoginProvider == "Google" && l.ProviderKey == googleId))
-                 {
-                     await _userManager.AddLoginAsync(user, new UserLoginInfo("Google", googleId, "Google"));
-                 }
+                // Ensure login is linked
+                var logins = await _userManager.GetLoginsAsync(user);
+                if (!logins.Any(l => l.LoginProvider == "Google" && l.ProviderKey == googleId))
+                {
+                    await _userManager.AddLoginAsync(user, new UserLoginInfo("Google", googleId, "Google"));
+                }
             }
 
             var token = await CreateJwtToken(user);

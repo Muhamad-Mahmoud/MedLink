@@ -1,7 +1,5 @@
 using MedLink.Application.DTOs.Doctors;
-using MedLink.Application.DTOs.Doctors;
 using MedLink.Application.Interfaces.Services;
-using MedLink.Application.Services;
 using MedLink.Application.Specifications;
 using MedLink.Domain.Entities.Medical;
 using Microsoft.AspNetCore.Mvc;

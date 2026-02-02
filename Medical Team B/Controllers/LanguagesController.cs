@@ -1,4 +1,4 @@
-﻿using MedLink_Application.Interfaces.Services;
+﻿using MedLink.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Medical_Team_B.Controllers

@@ -1,8 +1,8 @@
-﻿using MedLink.Domain.Entities.User;
+﻿using MedLink.Application.Interfaces.Persistence;
+using MedLink.Application.Interfaces.Services;
+using MedLink.Domain.Entities.User;
 using MedLink.Domain.Identity;
-using MedLink_Application.DTOs.UserProfile;
-using MedLink_Application.Interfaces.Persistence;
-using MedLink_Application.Interfaces.Services;
+using MedLink.Application.DTOs.UserProfile;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -11,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MedLink_Application.Services
+namespace MedLink.Application.Services
 {
     public class ProfileService : IProfileService
     {

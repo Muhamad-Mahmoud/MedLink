@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-namespace MedLink_Application.Specifications
+namespace MedLink.Application.Specifications
 {
     public class UpcomingAppointmentsByUserSpec
      : BaseSpecification<Appointment>

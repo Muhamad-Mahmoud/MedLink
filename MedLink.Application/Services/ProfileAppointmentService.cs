@@ -1,9 +1,9 @@
 using MedLink.Domain.Entities.Appointments;
 using MedLink.Domain.Enums;
-using MedLink_Application.DTOs.UserProfile;
-using MedLink_Application.Interfaces.Persistence;
-using MedLink_Application.Interfaces.Services;
-using MedLink_Application.Specifications;
+using MedLink.Application.DTOs.UserProfile;
+using MedLink.Application.Interfaces.Persistence;
+using MedLink.Application.Interfaces.Services;
+using MedLink.Application.Specifications;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

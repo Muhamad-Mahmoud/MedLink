@@ -1,12 +1,12 @@
-﻿using MedLink_Application.DTOs.UserProfile;
-using MedLink_Application.Interfaces.Services;
+﻿using MedLink.Application.DTOs.UserProfile;
+using MedLink.Application.Interfaces.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MedLink_Application.Services
+namespace MedLink.Application.Services
 {
     public class LanguageService : ILanguageService
     {

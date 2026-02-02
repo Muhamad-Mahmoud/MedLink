@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MedLink_Application.Interfaces.Services
+namespace MedLink.Application.Interfaces.Services
 {
     public interface IImageService
     {

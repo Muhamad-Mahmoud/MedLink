@@ -1,9 +1,9 @@
 ﻿using MedLink.Domain.Entities.User;
-using MedLink_Application.DTOs.UserProfile;
-using MedLink_Application.Interfaces.Persistence;
-using MedLink_Application.Interfaces.Services;
+using MedLink.Application.DTOs.UserProfile;
+using MedLink.Application.Interfaces.Persistence;
+using MedLink.Application.Interfaces.Services;
 
-namespace MedLink_Application.Services
+namespace MedLink.Application.Services
 {
     public class UserLanguageService : IUserLanguageService
     {

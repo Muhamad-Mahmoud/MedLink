@@ -1,8 +1,8 @@
-﻿using MedLink_Application.Interfaces.Services;
+﻿using MedLink.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 
-namespace MedLink_Application.Services
+namespace MedLink.Application.Services
 {
     public class ImageService : IImageService
     {

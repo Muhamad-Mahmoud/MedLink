@@ -2,8 +2,8 @@ using MedLink.Application.Interfaces.Services;
 using MedLink.Application.Mapping;
 using MedLink.Application.Services;
 using MedLink.Infrastructure.Services;
-using MedLink_Application.Interfaces.Services;
-using MedLink_Application.Services;
+using MedLink.Application.Interfaces.Services;
+using MedLink.Application.Services;
 
 namespace Medical_Team_B.Extensions
 {
