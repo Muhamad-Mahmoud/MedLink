@@ -22,8 +22,6 @@ namespace Medical_Team_B.Extensions
             services.AddScoped<IProfileAppointmentService, ProfileAppointmentService>();
             services.AddScoped<IImageService, ImageService>();
 
-            services.AddSingleton<ILanguageService, LanguageService>();
-            services.AddScoped<IDoctorService, DoctorService>();
             services.AddScoped<IFAQ,FAQService>();
             services.AddScoped<ILanguageService, LanguageService>();
             services.AddScoped<IAboutService, AboutService>();

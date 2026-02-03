@@ -2,6 +2,8 @@ using MedLink.Domain.Entities.Medical;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+namespace MedLink.Infrastructure.Persistence.Configurations;
+
 public class DoctorConfiguration : IEntityTypeConfiguration<Doctor>
 {
     public void Configure(EntityTypeBuilder<Doctor> builder)

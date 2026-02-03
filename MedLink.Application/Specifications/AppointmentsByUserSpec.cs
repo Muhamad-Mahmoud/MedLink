@@ -10,7 +10,7 @@ namespace MedLink.Application.Specifications
     public class AppointmentsByUserSpec : BaseSpecification<Appointment>
     {
         public AppointmentsByUserSpec(string userId)
-            : base(a => a.UserId == userId)
+            : base(a => a.BookedByUserId == userId)
         {
         }
     }

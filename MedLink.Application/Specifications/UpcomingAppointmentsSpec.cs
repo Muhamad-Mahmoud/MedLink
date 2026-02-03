@@ -12,7 +12,7 @@ namespace MedLink.Application.Specifications
     {
         public UpcomingAppointmentsSpec(string userId)
             : base(a =>
-                a.UserId == userId &&
+                a.BookedByUserId == userId &&
                 a.Status == AppointmentStatus.Pending)
         {
         }
