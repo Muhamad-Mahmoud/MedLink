@@ -22,7 +22,7 @@ namespace Medical_Team_B.Controllers
         [HttpPost("single-slot")]
         public async Task<ActionResult<DoctorAvailabilityDto>> AddSingleSlot([FromBody] AddSlotRequest request)
         {
-            var slot = await _availabilityService.AddSingleSlotAsync(request);
+            var slot = await _availabilityService.AddSingleSlotAsync(request, UserId);
             return Ok(slot);
         }
 
@@ -32,7 +32,7 @@ namespace Medical_Team_B.Controllers
         [HttpPost("day-schedule")]
         public async Task<ActionResult<List<DoctorAvailabilityDto>>> AddDaySchedule([FromBody] AddDayScheduleRequest request)
         {
-            var slots = await _availabilityService.AddDayScheduleAsync(request);
+            var slots = await _availabilityService.AddDayScheduleAsync(request, UserId);
             return Ok(slots);
         }
 
@@ -42,7 +42,7 @@ namespace Medical_Team_B.Controllers
         [HttpPost("week-schedule")]
         public async Task<ActionResult<List<DoctorAvailabilityDto>>> AddWeekSchedule([FromBody] AddWeekScheduleRequest request)
         {
-            var slots = await _availabilityService.AddWeekScheduleAsync(request);
+            var slots = await _availabilityService.AddWeekScheduleAsync(request, UserId);
             return Ok(slots);
         }
 
@@ -76,5 +76,7 @@ namespace Medical_Team_B.Controllers
             var slots = await _availabilityService.GetAvailableSlotsAsync(doctorId, date);
             return Ok(slots);
         }
+
+
     }
 }

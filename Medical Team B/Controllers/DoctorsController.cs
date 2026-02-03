@@ -1,8 +1,10 @@
 using AutoMapper;
 using MedLink.Application.DTOs.Doctors;
+using MedLink.Application.DTOs.Identity;
 using MedLink.Application.Interfaces.Services;
 using MedLink.Application.Specifications;
 using MedLink.Domain.Entities.Medical;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Medical_Team_B.Controllers
@@ -60,14 +62,16 @@ namespace Medical_Team_B.Controllers
         }
 
         /// <summary>
-        /// Creates a new doctor.
+        /// Creates a new doctor (Admin only).
         /// </summary>
-        /// <param name="doctor">The doctor details to create.</param>
+        /// <param name="dto">The doctor details to create.</param>
         [HttpPost]
-        public async Task<ActionResult<Doctor>> Create(Doctor doctor)
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<DoctorDto>> Create(AdminCreateDoctorDto dto)
         {
-            var createdDoctor = await _doctorService.AddDoctorAsync(doctor);
-            return CreatedAtAction(nameof(GetById), new { id = createdDoctor.Id }, createdDoctor);
+            var createdDoctor = await _doctorService.CreateDoctorAsync(dto);
+            var result = _mapper.Map<DoctorDto>(createdDoctor);
+            return CreatedAtAction(nameof(GetById), new { id = createdDoctor.Id }, result);
         }
 
         /// <summary>

@@ -37,7 +37,7 @@ namespace MedLink.Infrastructure.Persistence.Seed
             await SeedUserProfilesAsync(context, patientUser?.Id, adminUser?.Id);
 
             // 6. Doctors
-            await SeedDoctorsAsync(context);
+            await SeedDoctorsAsync(context, userManager);
 
             // 7. Doctor Availabilities (Granular Slots) - ensuring we have slots for testing
             await SeedDoctorAvailabilitiesAsync(context);
@@ -191,7 +191,7 @@ namespace MedLink.Infrastructure.Persistence.Seed
             await context.SaveChangesAsync();
         }
 
-        private static async Task SeedDoctorsAsync(ApplicationDbContext context)
+        private static async Task SeedDoctorsAsync(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             if (await context.Doctors.AnyAsync()) return;
 
@@ -199,59 +199,57 @@ namespace MedLink.Infrastructure.Persistence.Seed
             var derma = await context.Specializations.FirstAsync(s => s.Name == "Dermatology");
             var pedia = await context.Specializations.FirstAsync(s => s.Name == "Pediatrics");
 
-            var doctors = new List<Doctor>
+            var doctorData = new List<(string Name, string Email, int SpecialtyId, string Bio, decimal Price, Point Loc, Gender Gender, string Image, string Address)>
             {
-                new Doctor
-                {
-                    Name = "Dr. Ahmed Ali",
-                    SpecialtyId = cardio.Id,
-                    City = "Cairo",
-                    Bio = "Expert Cardiologist with over 15 years of experience in treating complex heart conditions.",
-                    Price = 500,
-                    Location = CreatePoint(31.2357, 30.0444), // Downtown Cairo (Lng, Lat)
-                    Gender = Gender.Male,
-                    ImageUrl = "https://randomuser.me/api/portraits/men/32.jpg",
-                    Address = "123 Tahrir St, Downtown, Cairo"
-                },
-                new Doctor
-                {
-                    Name = "Dr. Mona Sayed",
-                    SpecialtyId = derma.Id,
-                    City = "Giza",
-                    Bio = "Certified Dermatologist specializing in cosmetic procedures and skin health.",
-                    Price = 300,
-                    Location = CreatePoint(31.2089, 30.0131), // Dokki, Giza area
-                    Gender = Gender.Female,
-                    ImageUrl = "https://randomuser.me/api/portraits/women/44.jpg",
-                    Address = "45 Dokki St, Giza"
-                },
-                new Doctor
-                {
-                    Name = "Dr. Khaled Ibrahim",
-                    SpecialtyId = pedia.Id,
-                    City = "Alexandria",
-                    Bio = "Friendly Pediatrician dedicated to the health and well-being of children.",
-                    Price = 250,
-                    Location = CreatePoint(29.9187, 31.2001), // Alexandria
-                    Gender = Gender.Male,
-                    ImageUrl = "https://randomuser.me/api/portraits/men/85.jpg",
-                    Address = "10 Corniche Rd, Alexandria"
-                },
-                 new Doctor
-                {
-                    Name = "Dr. Sarah Nabil",
-                    SpecialtyId = cardio.Id,
-                    City = "Cairo",
-                    Bio = "Cardiology consultant focusing on preventive care.",
-                    Price = 450,
-                    Location = CreatePoint(31.3283, 30.0875), // Heliopolis, Cairo
-                    Gender = Gender.Female,
-                    ImageUrl = "https://randomuser.me/api/portraits/women/65.jpg",
-                    Address = "99 Merghany St, Heliopolis, Cairo"
-                }
+                ("Dr. Ahmed Ali", "ahmed.ali@medlink.com", cardio.Id, "Expert Cardiologist with over 15 years experience.", 500, CreatePoint(31.2357, 30.0444), Gender.Male, "https://randomuser.me/api/portraits/men/32.jpg", "123 Tahrir St, Cairo"),
+                ("Dr. Mona Sayed", "mona.sayed@medlink.com", derma.Id, "Certified Dermatologist specializing in cosmetic procedures.", 300, CreatePoint(31.2089, 30.0131), Gender.Female, "https://randomuser.me/api/portraits/women/44.jpg", "45 Dokki St, Giza"),
+                ("Dr. Khaled Ibrahim", "khaled.ibrahim@medlink.com", pedia.Id, "Friendly Pediatrician dedicated to children's health.", 250, CreatePoint(29.9187, 31.2001), Gender.Male, "https://randomuser.me/api/portraits/men/85.jpg", "10 Corniche Rd, Alexandria"),
+                ("Dr. Sarah Nabil", "sarah.nabil@medlink.com", cardio.Id, "Cardiology consultant focusing on preventive care.", 450, CreatePoint(31.3283, 30.0875), Gender.Female, "https://randomuser.me/api/portraits/women/65.jpg", "99 Merghany St, Heliopolis, Cairo")
             };
 
-            await context.Doctors.AddRangeAsync(doctors);
+            foreach (var data in doctorData)
+            {
+                var user = new ApplicationUser
+                {
+                    UserName = data.Email.Split('@')[0],
+                    Email = data.Email,
+                    FullName = data.Name,
+                    EmailConfirmed = true
+                };
+
+                var result = await userManager.CreateAsync(user, "Doctor@123");
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(user, "Doctor");
+
+                    var doctor = new Doctor
+                    {
+                        Name = data.Name,
+                        UserId = user.Id,
+                        SpecialtyId = data.SpecialtyId,
+                        Bio = data.Bio,
+                        Price = data.Price,
+                        Location = data.Loc,
+                        Gender = data.Gender,
+                        ImageUrl = data.Image,
+                        Address = data.Address,
+                        City = data.Email.Contains("Cairo") ? "Cairo" : (data.Email.Contains("Giza") ? "Giza" : "Alexandria")
+                    };
+
+                    context.Doctors.Add(doctor);
+                    
+                    // Also seed a profile for the doctor user
+                    context.UserProfiles.Add(new UserProfile
+                    {
+                        UserId = user.Id,
+                        FullName = data.Name,
+                        Gender = data.Gender,
+                        ImageUrl = data.Image,
+                        PreferredLanguage = "en"
+                    });
+                }
+            }
+
             await context.SaveChangesAsync();
         }
 

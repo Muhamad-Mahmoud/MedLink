@@ -4,8 +4,7 @@ namespace MedLink.Application.DTOs.Medical
 {
     public class AddWeekScheduleRequest
     {
-        [Required]
-        public int DoctorId { get; set; }
+        public int? DoctorId { get; set; }
         
         [Required]
         public DateTime StartDate { get; set; }

@@ -27,9 +27,11 @@ namespace MedLink.Application.Services
             _logger = logger;
         }
 
-        public async Task<DoctorAvailabilityDto> AddSingleSlotAsync(AddSlotRequest request)
+        public async Task<DoctorAvailabilityDto> AddSingleSlotAsync(AddSlotRequest request, string? userId = null)
         {
-            await ValidateDoctorExists(request.DoctorId);
+            int doctorId = await ResolveDoctorIdAsync(request.DoctorId, userId);
+            
+            await ValidateDoctorExists(doctorId);
 
             var startTime = TimeSpan.Parse(request.StartTime);
             var endTime = TimeSpan.Parse(request.EndTime);
@@ -39,26 +41,25 @@ namespace MedLink.Application.Services
 
             var slot = new DoctorAvailability
             {
-                DoctorId = request.DoctorId,
+                DoctorId = doctorId,
                 Date = request.Date.Date,
                 StartTime = startTime,
                 EndTime = endTime,
                 IsBooked = false,
                 UpdatedAt = DateTime.UtcNow
             };
-
-            // Needs validation for overlaps? Ideally yes.
-            // Simplified for now.
-
+            
             await _unitOfWork.Repository<DoctorAvailability>().AddAsync(slot);
             await _unitOfWork.Complete();
 
             return _mapper.Map<DoctorAvailabilityDto>(slot);
         }
 
-        public async Task<List<DoctorAvailabilityDto>> AddDayScheduleAsync(AddDayScheduleRequest request)
+        public async Task<List<DoctorAvailabilityDto>> AddDayScheduleAsync(AddDayScheduleRequest request, string? userId = null)
         {
-            await ValidateDoctorExists(request.DoctorId);
+            int doctorId = await ResolveDoctorIdAsync(request.DoctorId, userId);
+
+            await ValidateDoctorExists(doctorId);
 
             var start = TimeSpan.Parse(request.StartTime);
             var end = TimeSpan.Parse(request.EndTime);
@@ -73,7 +74,7 @@ namespace MedLink.Application.Services
 
                 slots.Add(new DoctorAvailability
                 {
-                    DoctorId = request.DoctorId,
+                    DoctorId = doctorId,
                     Date = request.Date.Date,
                     StartTime = cursor,
                     EndTime = slotEnd,
@@ -93,9 +94,11 @@ namespace MedLink.Application.Services
             return _mapper.Map<List<DoctorAvailabilityDto>>(slots);
         }
 
-        public async Task<List<DoctorAvailabilityDto>> AddWeekScheduleAsync(AddWeekScheduleRequest request)
+        public async Task<List<DoctorAvailabilityDto>> AddWeekScheduleAsync(AddWeekScheduleRequest request, string? userId = null)
         {
-             await ValidateDoctorExists(request.DoctorId);
+             int doctorId = await ResolveDoctorIdAsync(request.DoctorId, userId);
+
+             await ValidateDoctorExists(doctorId);
 
              var createdSlots = new List<DoctorAvailability>();
              var currentDate = request.StartDate.Date;
@@ -115,7 +118,7 @@ namespace MedLink.Application.Services
                         var slotEnd = cursor.Add(TimeSpan.FromMinutes(duration));
                         var slot = new DoctorAvailability
                         {
-                            DoctorId = request.DoctorId,
+                            DoctorId = doctorId,
                             Date = currentDate,
                             StartTime = cursor,
                             EndTime = slotEnd,
@@ -165,6 +168,40 @@ namespace MedLink.Application.Services
         {
             var doctor = await _unitOfWork.Repository<Doctor>().GetByIdAsync(doctorId);
             if (doctor == null) throw new KeyNotFoundException($"Doctor {doctorId} not found");
+        }
+
+        public async Task<int> GetDoctorIdByUserIdAsync(string userId)
+        {
+            // Use FindAsync with predicate directly to bypass Spec logic for debugging
+            var doctor = await _unitOfWork.Repository<Doctor>().FindAsync(d => d.UserId == userId);
+            
+            if (doctor == null) 
+                throw new KeyNotFoundException($"No doctor profile found linked to UserID: {userId}. Please ensure Doctor record exists and UserId column matches.");
+                
+            return doctor.Id;
+        }
+
+        private async Task<int> ResolveDoctorIdAsync(int? requestDoctorId, string? userId)
+        {
+            // If userId is present, it takes precedence (Doctor scenario)
+            if (!string.IsNullOrEmpty(userId))
+            {
+                var id = await GetDoctorIdByUserIdAsync(userId);
+                // Optionally verify if requestDoctorId was passed and matches
+                if (requestDoctorId.HasValue && requestDoctorId.Value != id && requestDoctorId.Value != 0)
+                {
+                    throw new UnauthorizedAccessException("Cannot manage slots for another doctor.");
+                }
+                return id;
+            }
+
+            // Fallback for Admin or manual ID
+            if (requestDoctorId.HasValue && requestDoctorId.Value != 0)
+            {
+               return requestDoctorId.Value;
+            }
+
+            throw new ArgumentException("DoctorId is required.");
         }
     }
 }

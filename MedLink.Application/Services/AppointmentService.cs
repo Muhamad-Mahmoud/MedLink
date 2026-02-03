@@ -47,41 +47,52 @@ namespace MedLink.Application.Services
             if (schedule.IsBooked)
                 throw new InvalidOperationException("This time slot is already booked. Please choose another one.");
 
-            // Encapsulated booking
-            schedule.Book(Now);
-
-            var appointment = new Appointment
-            {
-                DoctorId = schedule.DoctorId,
-                ScheduleId = request.ScheduleId,
-                PatientName = request.PatientName,
-                PatientPhone = request.PatientPhone,
-                PatientEmail = request.PatientEmail,
-                Notes = request.Notes,
-                BookedByUserId = request.BookedByUserId,
-                Status = AppointmentStatus.Pending,
-                Fee = fee,
-                CreatedAt = Now
-            };
-
-            _unitOfWork.Repository<DoctorAvailability>().Update(schedule);
-            await _unitOfWork.Repository<Appointment>().AddAsync(appointment);
-
+            await _unitOfWork.BeginTransactionAsync();
             try
             {
+                // 1. Encapsulated booking logic
+                schedule.Book(Now);
+
+                // 2. Map to Entity
+                var appointment = new Appointment
+                {
+                    DoctorId = schedule.DoctorId,
+                    ScheduleId = request.ScheduleId,
+                    PatientName = request.PatientName,
+                    PatientPhone = request.PatientPhone,
+                    PatientEmail = request.PatientEmail,
+                    Notes = request.Notes,
+                    BookedByUserId = request.BookedByUserId,
+                    Status = AppointmentStatus.Pending,
+                    Fee = fee,
+                    CreatedAt = Now
+                };
+
+                // 3. Track changes
+                _unitOfWork.Repository<DoctorAvailability>().Update(schedule);
+                await _unitOfWork.Repository<Appointment>().AddAsync(appointment);
+
+                // 4. Save and Commit
                 await _unitOfWork.Complete();
+                await _unitOfWork.CommitTransactionAsync();
+
+                // 5. Build Result
+                var appointmentDto = _mapper.Map<AppointmentDto>(appointment);
+                appointmentDto.Date = schedule.Date;
+                appointmentDto.StartTime = schedule.StartTime;
+                appointmentDto.EndTime = schedule.EndTime;
+                return appointmentDto;
             }
             catch (DbUpdateConcurrencyException)
             {
+                await _unitOfWork.RollbackTransactionAsync();
                 throw new InvalidOperationException("This time slot was just booked by another user. Please choose another slot.");
             }
-
-            var appointmentDto = _mapper.Map<AppointmentDto>(appointment);
-            appointmentDto.Date = schedule.Date;
-            appointmentDto.StartTime = schedule.StartTime;
-            appointmentDto.EndTime = schedule.EndTime;
-
-            return appointmentDto;
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw;
+            }
         }
 
         public async Task<AppointmentDto> GetAppointmentByIdAsync(int id)
@@ -174,13 +185,13 @@ namespace MedLink.Application.Services
             _unitOfWork.Repository<Appointment>().Update(appointment);
 
             try
-            {
-                await _unitOfWork.Complete();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                throw new InvalidOperationException("The selected slot was taken while you were rescheduling. Please try again.");
-            }
+             {
+                 await _unitOfWork.Complete();
+             }
+             catch (DbUpdateConcurrencyException)
+             {
+                 throw new InvalidOperationException("The selected slot was taken while you were rescheduling. Please try again.");
+             }
 
             return _mapper.Map<AppointmentDto>(appointment);
         }
@@ -210,13 +221,13 @@ namespace MedLink.Application.Services
             _unitOfWork.Repository<Appointment>().Update(appointment);
 
             try
-            {
-                await _unitOfWork.Complete();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                throw new InvalidOperationException("An error occurred while cancelling. Please try again.");
-            }
+             {
+                 await _unitOfWork.Complete();
+             }
+             catch (DbUpdateConcurrencyException)
+             {
+                 throw new InvalidOperationException("An error occurred while cancelling. Please try again.");
+             }
         }
 
         public async Task CompleteAppointmentAsync(int id, string userId)

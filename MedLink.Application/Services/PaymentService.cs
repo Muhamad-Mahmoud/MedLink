@@ -193,50 +193,62 @@ namespace MedLink.Application.Services
                 return await FinalizePayment(payment);
             }
             
-            if (isFail)
-            {
-                 payment.Status = PaymentStatus.Failed;
-                 payment.FailureReason = $"Stripe status: {stripeStatus}";
+             if (isFail)
+             {
+                  payment.Status = PaymentStatus.Failed;
+                  payment.FailureReason = $"Stripe status: {stripeStatus}";
+                  payment.UpdatedAt = DateTime.UtcNow;
+                  
+                  _unitOfWork.Repository<Payment>().Update(payment);
+                  await _unitOfWork.Complete();
+                  _logger.LogWarning("Payment {PaymentId} marked as Failed due to Stripe status: {StripeStatus}", payment.Id, stripeStatus);
+             }
+ 
+             return false;
+         }
+ 
+         private async Task<bool> FinalizePayment(Payment payment)
+         {
+              // Idempotency check again
+              if (payment.Status == PaymentStatus.Succeeded) return true;
+ 
+             await _unitOfWork.BeginTransactionAsync();
+             try
+             {
+                 payment.Status = PaymentStatus.Succeeded;
+                 payment.PaidAt = DateTime.UtcNow;
                  payment.UpdatedAt = DateTime.UtcNow;
+ 
                  _unitOfWork.Repository<Payment>().Update(payment);
+ 
+                 var appointment = await _unitOfWork.Repository<Appointment>().GetByIdAsync(payment.AppointmentId);
+                 if (appointment != null)
+                 {
+                     // Only update if currently pending to avoid overwriting completed/cancelled states
+                     if (appointment.Status == AppointmentStatus.Pending)
+                     {
+                         appointment.Status = AppointmentStatus.Confirmed;
+                         appointment.UpdatedAt = DateTime.UtcNow;
+                         _unitOfWork.Repository<Appointment>().Update(appointment);
+                     }
+                     else
+                     {
+                         _logger.LogWarning("Payment succeeded but Appointment {AppointmentId} status was {Status}. Status left unchanged.", appointment.Id, appointment.Status);
+                     }
+                 }
+ 
                  await _unitOfWork.Complete();
-                 _logger.LogWarning("Payment {PaymentId} marked as Failed due to Stripe status: {StripeStatus}", payment.Id, stripeStatus);
-            }
-
-            return false;
-        }
-
-        private async Task<bool> FinalizePayment(Payment payment)
-        {
-             // Idempotency check again
-             if (payment.Status == PaymentStatus.Succeeded) return true;
-
-            payment.Status = PaymentStatus.Succeeded;
-            payment.PaidAt = DateTime.UtcNow;
-            payment.UpdatedAt = DateTime.UtcNow;
-
-            _unitOfWork.Repository<Payment>().Update(payment);
-
-            var appointment = await _unitOfWork.Repository<Appointment>().GetByIdAsync(payment.AppointmentId);
-            if (appointment != null)
-            {
-                // Only update if currently pending to avoid overwriting completed/cancelled states
-                if(appointment.Status == AppointmentStatus.Pending)
-                {
-                    appointment.Status = AppointmentStatus.Confirmed;
-                    appointment.UpdatedAt = DateTime.UtcNow;
-                    _unitOfWork.Repository<Appointment>().Update(appointment);
-                }
-                else
-                {
-                    _logger.LogWarning("Payment succeeded but Appointment {AppointmentId} status was {Status}. Status left unchanged.", appointment.Id, appointment.Status);
-                }
-            }
-
-            await _unitOfWork.Complete();
-            _logger.LogInformation("Payment {PaymentId} confirmed successfully.", payment.Id);
-            return true;
-        }
+                 await _unitOfWork.CommitTransactionAsync();
+                 _logger.LogInformation("Payment {PaymentId} confirmed successfully.", payment.Id);
+                 return true;
+             }
+             catch (Exception ex)
+             {
+                 await _unitOfWork.RollbackTransactionAsync();
+                 _logger.LogError(ex, "Failed to finalize payment {PaymentId}", payment.Id);
+                 throw;
+             }
+         }
 
         public async Task<PaymentDto> GetPaymentByAppointmentIdAsync(int appointmentId)
         {

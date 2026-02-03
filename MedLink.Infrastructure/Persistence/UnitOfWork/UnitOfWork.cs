@@ -11,6 +11,8 @@ namespace MedLink.Infrastructure.Persistence.UnitOfWork
 
         private readonly ApplicationDbContext _dbContext;
         private Hashtable _repositories;
+        private Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction _transaction;
+
         public UnitOfWork(ApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
@@ -38,7 +40,39 @@ namespace MedLink.Infrastructure.Persistence.UnitOfWork
 
         public void Dispose()
         {
+            _transaction?.Dispose();
             _dbContext.Dispose();
+        }
+
+        public async Task BeginTransactionAsync()
+        {
+            _transaction = await _dbContext.Database.BeginTransactionAsync();
+        }
+
+        public async Task CommitTransactionAsync()
+        {
+            try
+            {
+                await _transaction.CommitAsync();
+            }
+            finally
+            {
+                _transaction.Dispose();
+                _transaction = null;
+            }
+        }
+
+        public async Task RollbackTransactionAsync()
+        {
+            try
+            {
+                await _transaction.RollbackAsync();
+            }
+            finally
+            {
+                _transaction.Dispose();
+                _transaction = null;
+            }
         }
 
 

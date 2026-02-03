@@ -4,7 +4,7 @@ namespace MedLink.Application.DTOs.Medical
 {
     public class AddSlotRequest
     {
-        public int DoctorId { get; set; }
+        public int? DoctorId { get; set; }
         
         public DateTime Date { get; set; }
         
