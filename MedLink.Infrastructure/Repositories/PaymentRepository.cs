@@ -1,5 +1,4 @@
 ﻿using MedLink.Domain.Entities.Payments;
-using MedLink.Domain.Enums;
 using MedLink.Infrastructure.Persistence.Context;
 using MedLink_Application.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;

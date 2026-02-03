@@ -1,17 +1,17 @@
-﻿using MedLink.Application.Interfaces.Services;
-using MedLink.Infrastructure.Services;
+﻿using System.Security.Claims;
 using MedLink.Application.DTOs.UserProfile;
 using MedLink.Application.Interfaces.Services;
-using MedLink.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace MedLink.API.Controllers
 {
     [ApiController]
     [Route("api/profile")]
     [Authorize]
+    /// <summary>
+    /// Manages user profile, dashboard, and settings.
+    /// </summary>
     public class UserProfileController : ControllerBase
     {
         private readonly IProfileDashboardService _profileDashboardService;
@@ -36,11 +36,14 @@ namespace MedLink.API.Controllers
 
         private string GetUserId()
         {
-            return User.FindFirstValue("uid") ?? throw new UnauthorizedAccessException("User not authenticated"); ; 
+            return User.FindFirstValue("uid") ?? throw new UnauthorizedAccessException("User not authenticated"); ;
         }
 
 
 
+        /// <summary>
+        /// Retrieves user dashboard statistics.
+        /// </summary>
         [HttpGet("dashboard")]
         public async Task<IActionResult> GetMyDashboard()
         {
@@ -53,7 +56,9 @@ namespace MedLink.API.Controllers
         }
 
 
-        // api/profile/me
+        /// <summary>
+        /// Retrieves current user profile details.
+        /// </summary>
         [HttpGet("me")]
         public async Task<ActionResult<EditProfileDto>> GetMyProfile()
         {
@@ -66,7 +71,10 @@ namespace MedLink.API.Controllers
             return Ok(profile);
         }
 
-        //  api/profile
+        /// <summary>
+        /// Updates the user's profile information.
+        /// </summary>
+        /// <param name="dto">The updated profile data.</param>
         [HttpPut]
         public async Task<IActionResult> UpdateMyProfile([FromBody] UpdateProfileDto dto)
         {
@@ -79,25 +87,34 @@ namespace MedLink.API.Controllers
         }
 
 
-        // PUT: api/profile/image
+
+        /// <summary>
+        /// Updates the user's profile image.
+        /// </summary>
+        /// <param name="request">The image upload request.</param>
         [HttpPut("image")]
-        public async Task<IActionResult> UpdateProfileImage([FromForm] IFormFile image)
+        [Consumes("multipart/form-data")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdateProfileImage([FromForm] UploadImageRequest request)
         {
             var userId = GetUserId();
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
-            if (image == null || image.Length == 0)
+            if (request.Image == null || request.Image.Length == 0)
                 return BadRequest("Image is required");
 
-            var imageUrl = await _imageService.UploadAsync(image);
+            var imageUrl = await _imageService.UploadAsync(request.Image);
 
             await _profileService.UpdateProfileImageAsync(userId, imageUrl);
             return NoContent();
         }
 
 
-        // api/profile/image
+        /// <summary>
+        /// Removes the user's profile image.
+        /// </summary>
         [HttpDelete("image")]
         public async Task<IActionResult> RemoveProfileImage()
         {
@@ -110,8 +127,11 @@ namespace MedLink.API.Controllers
         }
 
 
-        //  api/profile/appointments/past
-
+        /// <summary>
+        /// Retrieves past appointments.
+        /// </summary>
+        /// <param name="page">Page number.</param>
+        /// <param name="pageSize">Items per page.</param>
         [HttpGet("appointments/past")]
         public async Task<IActionResult> GetPast(
             [FromQuery] int page = 1,
@@ -125,8 +145,11 @@ namespace MedLink.API.Controllers
             return Ok(result);
         }
 
-        //api/profile/appointments/past
-
+        /// <summary>
+        /// Retrieves upcoming appointments.
+        /// </summary>
+        /// <param name="page">Page number.</param>
+        /// <param name="pageSize">Items per page.</param>
         [HttpGet("appointments/upcoming")]
         public async Task<IActionResult> GetUpcoming(
             [FromQuery] int page = 1,
@@ -141,7 +164,9 @@ namespace MedLink.API.Controllers
         }
 
 
-        // api/profile/language
+        /// <summary>
+        /// Retrieves the user's preferred language.
+        /// </summary>
         [HttpGet("language")]
         public async Task<IActionResult> GetPreferredLanguage()
         {
@@ -153,7 +178,10 @@ namespace MedLink.API.Controllers
             return Ok(language);
         }
 
-        //  api/profile/language
+        /// <summary>
+        /// Updates the user's preferred language.
+        /// </summary>
+        /// <param name="dto">The language update details.</param>
         [HttpPut("language")]
         public async Task<IActionResult> UpdatePreferredLanguage([FromBody] UpdateLanguageDto dto)
         {

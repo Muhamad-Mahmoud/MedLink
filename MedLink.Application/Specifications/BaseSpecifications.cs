@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
-using MedLink.Domain.Common;
 using MedLink.Application.Interfaces.Specifications;
+using MedLink.Domain.Common;
 
 namespace MedLink.Application.Specifications
 {

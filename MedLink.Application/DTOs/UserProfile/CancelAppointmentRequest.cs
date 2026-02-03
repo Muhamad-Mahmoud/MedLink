@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MedLink.Application.DTOs.UserProfile
+﻿namespace MedLink.Application.DTOs.UserProfile
 {
     public class CancelAppointmentRequest
     {
-            public string? Reason { get; set; }
+        public string? Reason { get; set; }
     }
 }

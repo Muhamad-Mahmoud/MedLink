@@ -23,8 +23,7 @@ public class DoctorConfiguration : IEntityTypeConfiguration<Doctor>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(d => d.Location)
-            .HasColumnType("geography")
-            .IsRequired();
+            .HasColumnType("geography");
 
         builder.Property(d => d.Address);
 
@@ -44,7 +43,7 @@ public class DoctorConfiguration : IEntityTypeConfiguration<Doctor>
             .HasForeignKey(d => d.SpecialtyId)
             .OnDelete(DeleteBehavior.Restrict);
 
-     //   builder.Ignore(d => d.Location);
+        //   builder.Ignore(d => d.Location);
 
 
 

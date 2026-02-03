@@ -1,22 +1,16 @@
+using System.ComponentModel.DataAnnotations;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using AutoMapper;
-using MedLink.Domain.Identity;
 using MedLink.Application.Common.JWT;
 using MedLink.Application.DTOs.Identity;
 using MedLink.Application.Interfaces.Services;
+using MedLink.Domain.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Net.Mail;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using MedLink_Application.DTOs.Identity;
 
 namespace MedLink.Application.Services
 {
@@ -31,6 +25,7 @@ namespace MedLink.Application.Services
         private readonly IProfileService _profileService;
 
         public AuthService(UserManager<ApplicationUser> userManager, IOptions<Jwt> jwt, IMapper mapper, RoleManager<IdentityRole> roleManager, IEmailService emailService, ISmsService smsService, IProfileService profileService)
+        public AuthService(UserManager<ApplicationUser> userManager, IOptions<Jwt> jwt, IProfileService userProfileService, IMapper mapper, RoleManager<IdentityRole> roleManager, IEmailService emailService, ISmsService smsService)
         {
             _userManager = userManager;
             _jwt = jwt.Value;
@@ -54,6 +49,7 @@ namespace MedLink.Application.Services
                 return new AuthModel { Message = "Email already registered" };
 
             var user = _mapper.Map<ApplicationUser>(model);
+
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (!result.Succeeded)
@@ -294,7 +290,6 @@ namespace MedLink.Application.Services
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                 return new ResetPasswordResult(false, errors);
-
             }
 
             return new ResetPasswordResult(true, "Password Changed Successfully");
@@ -365,6 +360,7 @@ namespace MedLink.Application.Services
 
         public async Task<string> AddRoleAsync(AddRoleModel model)
         {
+        {
             var user = await _userManager.FindByIdAsync(model.UserId);
 
             if (user is null || !await _roleManager.RoleExistsAsync(model.Role))
@@ -408,7 +404,6 @@ namespace MedLink.Application.Services
 
             claims.AddRange(userClaims);
             claims.AddRange(roleClaims);
-
 
             var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
             var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);

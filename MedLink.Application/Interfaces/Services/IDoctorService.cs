@@ -1,5 +1,4 @@
 using MedLink.Application.DTOs.Doctors;
-using MedLink.Application.DTOs.Doctors;
 using MedLink.Application.Interfaces.Specifications;
 using MedLink.Domain.Entities.Medical;
 

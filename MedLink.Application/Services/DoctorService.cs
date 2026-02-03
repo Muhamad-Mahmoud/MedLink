@@ -1,12 +1,11 @@
 using AutoMapper;
 using MedLink.Application.DTOs.Doctors;
+using MedLink.Application.Interfaces.Persistence;
 using MedLink.Application.Interfaces.Services;
-using MedLink.Application.Specifications.Medical;
+using MedLink.Application.Interfaces.Specifications;
 using MedLink.Application.Specifications.Medical;
 using MedLink.Domain.Entities.Medical;
 using MedLink.Domain.Exceptions;
-using MedLink.Application.Interfaces.Persistence;
-using MedLink.Application.Interfaces.Specifications;
 
 namespace MedLink.Application.Services
 {
@@ -47,7 +46,7 @@ namespace MedLink.Application.Services
             return doctor;
         }
 
-       
+
         public async Task UpdateDoctorAsync(Doctor doctor)
         {
             var repo = _unitOfWork.Repository<Doctor>();
@@ -55,17 +54,17 @@ namespace MedLink.Application.Services
             await _unitOfWork.Complete();
         }
 
-       
+
         public async Task DeleteDoctorAsync(int id)
         {
             var repo = _unitOfWork.Repository<Doctor>();
 
-            
+
             var doctor = await repo.GetByIdAsync(id);
 
             if (doctor != null)
             {
-               doctor.IsDeleted= true;
+                doctor.IsDeleted = true;
                 await _unitOfWork.Complete();
             }
             else
@@ -82,19 +81,19 @@ namespace MedLink.Application.Services
 
         public async Task<IReadOnlyList<Doctor>> GetAllDoctorsAsync(ISpecification<Doctor>? spec = null)
         {
-           
-        
+
+
             var repo = _unitOfWork.Repository<Doctor>();
             return spec != null
                 ? await repo.GetAllWithSpecAsync(spec)
                 : await repo.GetAllAsync();
         }
 
-       
-       
-        
-          
-        
+
+
+
+
+
     }
-    }
+}
 
