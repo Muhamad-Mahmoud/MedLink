@@ -5,7 +5,7 @@ using MedLink.Application.Specifications.Appointments;
 using MedLink.Domain.Entities.Appointments;
 using MedLink.Domain.Enums;
 
-namespace MedLink.Infrastructure.Services
+namespace MedLink.Application.Services
 {
     public class ProfileAppointmentService : IProfileAppointmentService
     {

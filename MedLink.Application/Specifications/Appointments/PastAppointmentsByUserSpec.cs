@@ -1,7 +1,7 @@
-﻿using MedLink.Domain.Entities.Appointments;
+using MedLink.Domain.Entities.Appointments;
 using MedLink.Domain.Enums;
 
-namespace MedLink.Application.Specifications
+namespace MedLink.Application.Specifications.Appointments
 {
     public class PastAppointmentsByUserSpec
         : BaseSpecification<Appointment>
@@ -39,4 +39,3 @@ namespace MedLink.Application.Specifications
         }
     }
 }
-

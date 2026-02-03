@@ -1,6 +1,6 @@
 ﻿using MedLink.Domain.Entities.Payments;
 
-namespace MedLink_Application.Interfaces.Repositories
+namespace MedLink.Application.Interfaces.Repositories
 {
     public interface IPaymentRepository
     {

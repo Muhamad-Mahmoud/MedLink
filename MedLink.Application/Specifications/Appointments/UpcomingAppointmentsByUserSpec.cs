@@ -1,13 +1,7 @@
-﻿using MedLink.Domain.Entities.Appointments;
+using MedLink.Domain.Entities.Appointments;
 using MedLink.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 
-namespace MedLink.Application.Specifications
+namespace MedLink.Application.Specifications.Appointments
 {
     public class UpcomingAppointmentsByUserSpec
      : BaseSpecification<Appointment>
@@ -37,15 +31,11 @@ namespace MedLink.Application.Specifications
            int page,
            int pageSize)
            : this(userId)
-            {
-                ApplyPagination(
-                    (page - 1) * pageSize,
-                    pageSize
-                );
-            }
+        {
+            ApplyPagination(
+                (page - 1) * pageSize,
+                pageSize
+            );
+        }
     }
-
-
-
-
 }

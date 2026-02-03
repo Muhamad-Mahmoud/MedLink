@@ -24,8 +24,14 @@ namespace MedLink.Application.Services
         private readonly ISmsService _smsService;
         private readonly IProfileService _profileService;
 
-        public AuthService(UserManager<ApplicationUser> userManager, IOptions<Jwt> jwt, IMapper mapper, RoleManager<IdentityRole> roleManager, IEmailService emailService, ISmsService smsService, IProfileService profileService)
-        public AuthService(UserManager<ApplicationUser> userManager, IOptions<Jwt> jwt, IProfileService userProfileService, IMapper mapper, RoleManager<IdentityRole> roleManager, IEmailService emailService, ISmsService smsService)
+        public AuthService(
+            UserManager<ApplicationUser> userManager, 
+            IOptions<Jwt> jwt, 
+            IMapper mapper, 
+            RoleManager<IdentityRole> roleManager, 
+            IEmailService emailService, 
+            ISmsService smsService, 
+            IProfileService profileService)
         {
             _userManager = userManager;
             _jwt = jwt.Value;
@@ -359,7 +365,6 @@ namespace MedLink.Application.Services
         // =================================================================================================
 
         public async Task<string> AddRoleAsync(AddRoleModel model)
-        {
         {
             var user = await _userManager.FindByIdAsync(model.UserId);
 

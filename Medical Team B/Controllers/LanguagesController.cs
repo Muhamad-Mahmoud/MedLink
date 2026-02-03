@@ -9,9 +9,6 @@ namespace Medical_Team_B.Controllers
     /// <summary>
     /// Manages supported languages.
     /// </summary>
-    public class LanguagesController : ControllerBase
-    {
-        private readonly ILanguageService _languageService;
     public class LanguagesController : BaseApiController
     {
         private readonly ILanguageService _languageService;
@@ -80,9 +77,4 @@ namespace Medical_Team_B.Controllers
             return NoContent();
         }
     }
-    
-
-        
-    }
-
 }

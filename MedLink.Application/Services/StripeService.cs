@@ -3,7 +3,7 @@ using MedLink.Domain.Interfaces.Repositories;
 using Microsoft.Extensions.Configuration;
 using Stripe;
 
-namespace MedLink_Application.Services
+namespace MedLink.Application.Services
 {
 
     public class StripeService : IStripeService
